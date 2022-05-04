@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <ProjectOutputs>
+    <ProjectOutput>
+      <FullPath>D:\dev\fluffyunikxrn (github)\snowcookie\bin\Debug-windows-x86_64\sce-corelib\sce-corelib.dll</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>D:\dev\fluffyunikxrn (github)\snowcookie\bin\Debug-windows-x86_64\sce-sandbox\sce-sandbox.exe</FullPath>
+    </ProjectOutput>
+  </ProjectOutputs>
+  <ContentFiles />
+  <SatelliteDlls />
+  <NonRecipeFileRefs />
+</Project>

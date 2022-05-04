@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "ProjectMap": {
+    "4d96cab0-b94b-43a6-4240-3d7daef439aa": {
+      "ProjectGuid": "4d96cab0-b94b-43a6-4240-3d7daef439aa",
+      "DisplayName": "sce-corelib",
+      "ColorIndex": 0
+    }
+  },
+  "NextColorIndex": 1
+}
