@@ -39,4 +39,4 @@
 *.vcxproj.user.filters
 
 # Folders
-.vs/..
+/.vs/..
