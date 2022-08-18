@@ -33,3 +33,9 @@
 
 # others
 *.log
+*.sln
+*.vcxproj
+*.vcxproj.user
+
+# Folders
+.vs/..
