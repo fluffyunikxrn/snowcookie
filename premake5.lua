@@ -2,8 +2,8 @@
 
 -- globals
 snowcookie = "snowcookie"
-corelib = "sce-corelib"
-sandbox = "sce-sandbox"
+corelib = "sce_corelib"
+sandbox = "sce_sandbox"
 
 -- workspace globals
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
@@ -15,7 +15,7 @@ workspace (snowcookie)
     architecture "x64"
     characterset ("unicode")
     configurations { "Debug", "Release", "Dist", "DebugDLL", "ReleaseDLL", "DistDLL" }
-    cppdialect "C++17"
+    cppdialect "C++20"
     -- defines {}
     language "C++"
     startproject(sandbox)
@@ -34,15 +34,17 @@ project (corelib)
     kind "SharedLib"
     language "C++"
 
+    -- buildoptions "--std c++20"
+
     targetdir (bin .. "/%{prj.name}")
     objdir (binint .. "/%{prj.name}")
 
     files { "%{prj.name}/src/**.h", "%{prj.name}/src/**.hpp", "%{prj.name}/src/**.hxx", "%{prj.name}/src/**.c", "%{prj.name}/src/**.cpp", "%{prj.name}/src/**.cxx" }
 
-    defines { "__sce_no_client__" }
+    defines { "__SCE_EXPORT__" }
 
-    pchheader "sce-pch.h"
-    pchsource "src/sce-pch.cpp"
+    pchheader "sce_pch.h"
+    pchsource "src/sce_pch.cpp"
 
     includedirs { "%{prj.name}/src" }
     libdirs { "%{wks.location}/" .. bin .. corelib }
@@ -59,18 +61,22 @@ project (corelib)
         defines { "DIST", "NDEBUG" }
     
     filter "system:windows"
-        buildoptions  ("/Yc\"sce-pch.h\"")
+        buildoptions  ("/Yc\"sce_pch.h\"")
 
 -- project sandbox client
 project (sandbox)
     dependson { corelib }
     location "%{prj.name}"
-    kind "ConsoleApp"    
+    kind "ConsoleApp"
+
+    -- buildoptions "--std c++20"
 
     targetdir (bin .. "/%{prj.name}")
     objdir (binint .. "/%{prj.name}")
 
     files { "%{prj.name}/src/**.h", "%{prj.name}/src/**.hpp", "%{prj.name}/src/**.hxx", "%{prj.name}/src/**.c", "%{prj.name}/src/**.cpp", "%{prj.name}/src/**.cxx" }
+
+    defines { "__SCE_IMPORT__" }
 
     includedirs { "%{prj.name}/src", ("%{wks.location}/" .. corelib .. "/src") }
     libdirs { "%{wks.location}/bin/" .. bin ..  corelib }
