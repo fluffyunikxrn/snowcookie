@@ -151,7 +151,7 @@
       <ImportLibrary>..\bin\Debug-windows-x86_64\sce_corelib\sce_corelib.lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
-      <Command>IF EXIST "$(TargetDir)$(ProjectName).dll" (xcopy /Q /E /Y /I "$(TargetDir)$(ProjectName).dll" "$(SolutionDir)bin\Debug-windows-x86_64\sce_sandbox" &gt; nul) ELSE (xcopy /Q /Y /I "$(TargetDir)$(ProjectName).dll" "$(SolutionDir)bin\Debug-windows-x86_64\sce_sandbox" &gt; nul)</Command>
+      <Command>IF EXIST $(TargetDir)$(ProjectName).dll\ (xcopy /Q /E /Y /I $(TargetDir)$(ProjectName).dll $(SolutionDir)bin\Debug-windows-x86_64\sce_sandbox &gt; nul) ELSE (xcopy /Q /Y /I $(TargetDir)$(ProjectName).dll $(SolutionDir)bin\Debug-windows-x86_64\sce_sandbox &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

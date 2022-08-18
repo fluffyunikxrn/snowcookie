@@ -36,6 +36,7 @@
 *.sln
 *.vcxproj
 *.vcxproj.user
+*.vcxproj.user.filters
 
 # Folders
 .vs/..

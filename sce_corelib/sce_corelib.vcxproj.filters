@@ -18,6 +18,9 @@
     <ClInclude Include="src\app\sce_app.h">
       <Filter>app</Filter>
     </ClInclude>
+    <ClInclude Include="src\debuger\sce_log.h">
+      <Filter>debuger</Filter>
+    </ClInclude>
     <ClInclude Include="src\sce_pch.h" />
     <ClInclude Include="src\system\sce_platform.h">
       <Filter>system</Filter>
@@ -25,17 +28,14 @@
     <ClInclude Include="src\utilities\sce_strings.h">
       <Filter>utilities</Filter>
     </ClInclude>
-    <ClInclude Include="src\debuger\sce_log.h">
-      <Filter>debuger</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\app\sce_app.cpp">
       <Filter>app</Filter>
     </ClCompile>
-    <ClCompile Include="src\sce_pch.cpp" />
     <ClCompile Include="src\debuger\sce_log.cpp">
       <Filter>debuger</Filter>
     </ClCompile>
+    <ClCompile Include="src\sce_pch.cpp" />
   </ItemGroup>
 </Project>
