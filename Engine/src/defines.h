@@ -1,5 +1,13 @@
 #pragma once
 
+#if defined(DEBUG) || defined(_DEBUG)
+#define SCE_PLATFORM_DEBUG 1
+#elif defined(RELEASE) || defined(_NDEBUG) || defined(NDEBUG)
+#define SCE_PLATFORM_RELEASE 1
+#else
+#error "unknown configuration"
+#endif
+
 // Character set(s)
 #if defined(_UNICODE) || defined(UNICODE)
 #define SCE_PLATFORM_UNICODE 1

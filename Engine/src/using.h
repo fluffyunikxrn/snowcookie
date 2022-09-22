@@ -24,6 +24,8 @@ using u16 = unsigned short int;			// 16-bit wide
 using u32 = unsigned int;				// 32-bit wide
 using ul32 = unsigned long int;			// 32-bit wide
 using u64 = unsigned long long int;		// 64-bit wide
+
+using size64 = unsigned long long int;	// 64-bit wide
 #elif defined(SCE_PLATFORM_LP64)
 using i8 = signed char;					// 08-bit wide
 using i16 = signed short int;			// 16-bit wide
@@ -36,6 +38,8 @@ using u16 = unsigned short int;			// 16-bit wide
 using u32 = unsigned int;				// 32-bit wide
 using u64 = unsigned long int;			// 64-bit wide
 using ull64 = unsigned long long int;	// 64-bit wide
+
+using size64 = unsigned long long int;	// 64-bit wide
 #endif // !Integer bit size(s)
 
 // Floating-point number(s)
@@ -49,3 +53,7 @@ using b32 = i32;						// 32-bit wide
 // Character(s)
 using c8 = char;						// 08-bit wide
 using c16 = wchar_t;					// 16-bit wide
+
+#if not defined(_NEW_)
+#include <new>
+#endif // !_NEW_
