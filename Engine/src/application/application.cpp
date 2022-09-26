@@ -1,41 +1,43 @@
+/*
+* File name: Application.cpp
+* File desc: Where the application runs.
+* Author: Chloe Tunrer (chloeturner@tuta.io)
+* Copyright: Copyright 2022 Chloe Tunrer
+*/
+
 #include "pch.h"
 #include "application.h"
 
 sce::Application::Application() : m_Str((c8*)calloc(1, sizeof(c8)))
 {
 #if defined(SCE_PLATFORM_DEBUG)
-	std::wcout << __FUNCTIONW__ << std::endl;
-#endif
+	printf("%s\n", __FUNCTION__);
+#endif // !SCE_PLATFORM_DEBUG
 
 }
 
 sce::Application::~Application()
 {
 #if defined(SCE_PLATFORM_DEBUG)
-	std::wcout << __FUNCTIONW__ << std::endl;
-#endif
+	printf("%s\n", __FUNCTION__);
+#endif // !SCE_PLATFORM_DEBUG
 
-	sce::Memory::GetInstance()->DeallocateAll();
-	
-#if defined(SCE_PLATFORM_DEBUG)
-	//std::wcout << __FUNCTIONW__ << std::endl;
-	std::cout << "Total pointer memory: " << sce::Memory::GetInstance()->GetTotalPointerMemory() << " bytes" << std::endl;
-	std::cout << "Total allocated memory: " << sce::Memory::GetInstance()->GetTotalAllocatedMemory() << " bytes" << std::endl;
-#endif	
+	// Clean allocation(s)
+	sce::Memory::GetInstance()->ShutdownMemory();
 }
 
-int sce::Application::Run()
+i32 sce::Application::Run()
 {
 #if defined(SCE_PLATFORM_DEBUG)
-	std::wcout << __FUNCTIONW__ << std::endl;
-#endif
+	printf("%s\n", __FUNCTION__);
+#endif // !SCE_PLATFORM_DEBUG
 
-	int* i = new int;
-	int* j = new int[10];
-	//delete i; 
-	//delete j;
-
-	int* k = new int(sce::MemoryTag::MEMORY_APPLICATION);
+ 	i16* i1 = new i16;
+	i32* i2 = new i32;
+	i64* i3 = new i64;
+	delete i1;
+	delete i2;
+	delete i3;
 
 	return 0;
 }

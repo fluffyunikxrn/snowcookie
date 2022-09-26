@@ -1,6 +1,18 @@
+/*
+* File name: Pch.h
+* File desc: Precomiled head source file.
+* Author: Chloe Tunrer (chloeturner@tuta.io)
+* Copyright: Copyright 2022 Chloe Tunrer
+*/
+
 #pragma once
 
+#ifndef _IOSTREAM_
 #include <iostream>
-#include <iomanip>
+#endif // !_IOSTREAM_
 
-#include <stack>
+#ifndef _IOMANIP_
+#include <iomanip>
+#endif // !_IOMANIP_
+
+//#include <stack>

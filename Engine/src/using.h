@@ -1,3 +1,10 @@
+/*
+* File name: Using.h
+* File desc: Decleration of using type(s).
+* Author: Chloe Tunrer (chloeturner@tuta.io)
+* Copyright: Copyright 2022 Chloe Tunrer
+*/
+
 #pragma once
 
 #include "defines.h"
@@ -53,6 +60,9 @@ using b32 = i32;						// 32-bit wide
 // Character(s)
 using c8 = char;						// 08-bit wide
 using c16 = wchar_t;					// 16-bit wide
+
+// Pointer(s)
+using v8 = void;
 
 #if not defined(_NEW_)
 #include <new>

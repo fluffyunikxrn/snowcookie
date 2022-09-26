@@ -1,3 +1,10 @@
+/*
+* File name: Defines.h
+* File desc: Preprocessor defines for catching specific system informaiton.
+* Author: Chloe Tunrer (chloeturner@tuta.io)
+* Copyright: Copyright 2022 Chloe Tunrer
+*/
+
 #pragma once
 
 #if defined(DEBUG) || defined(_DEBUG)
