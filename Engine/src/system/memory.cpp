@@ -86,11 +86,18 @@ v8 __CRTDECL operator delete[](v8* pMem, size_t _Size) noexcept
 {
 	return sce::Memory::GetInstance()->DeleteMemory(pMem);
 }
-
 #endif // SCE_PLATFORM_WINDOWS
 
-//// Engine specific overrides
-//v8* operator new(size_t nSize, sce::MemoryTag tag);
+// Engine specific overrides
+/* New operator with tag placement
+* @param nSize:
+* @param tag:
+*/
+v8* operator new(size_t nSize, sce::MemoryTag tag)
+{
+	v8* p_mem = (void*)malloc(nSize);
+	return sce::Memory::GetInstance()->NewMemory(p_mem, nSize, tag);
+}
 #pragma endregion newdelete
 
 /* ==========================================================

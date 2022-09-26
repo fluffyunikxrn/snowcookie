@@ -80,8 +80,12 @@ v8 __CRTDECL operator delete(v8 * pMem, size_t _Size) noexcept;
 v8 __CRTDECL operator delete[](v8* pMem, size_t _Size) noexcept;
 #endif // SCE_PLATFORM_WINDOWS
 
-//// Engine specific overrides
-//v8* operator new(size_t nSize, sce::MemoryTag tag);
+// Engine specific overrides
+/* New operator with tag placement
+* @param nSize:
+* @param tag:
+*/
+v8* operator new(size_t nSize, sce::MemoryTag tag);
 #pragma endregion newdelete
 
 /* 
