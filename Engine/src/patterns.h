@@ -13,10 +13,7 @@
 namespace sce
 {
 	// Class forward decleration(s)
-	//template<class Obj>
 	class INonCopy;
-
-	//template<class Obj>
 	class INonMove;
 
 	template<class Obj>
@@ -24,7 +21,6 @@ namespace sce
 
 	// Class(s)
 	// None copyable
-	//template<class Obj>
 	class SCEAPI INonCopy
 	{
 	protected:
@@ -33,16 +29,12 @@ namespace sce
 		virtual ~INonCopy() {}
 
 	private:
-		INonCopy(const INonCopy&) = delete;
-		//Obj(const Obj&) = delete;
-
 		// Operator(s)
+		INonCopy(const INonCopy&) = delete;		
 		INonCopy& operator=(const INonCopy&) = delete;
-		//Obj& operator=(const Obj&) = delete;
 	};
 
 	// None moveable
-	//template<class Obj>
 	class SCEAPI INonMove
 	{
 	protected:
@@ -51,9 +43,8 @@ namespace sce
 		virtual ~INonMove() {}
 
 	private:
-		INonMove(INonMove&&) = delete;
-
 		// Operator(s)
+		INonMove(INonMove&&) = delete;		
 		INonMove& operator=(INonMove&&) = delete;
 	};
 
@@ -77,15 +68,70 @@ namespace sce
 		static inline v8 DeleteInstance()
 		{
 			delete g_pInstance;
+			g_pInstance = nullptr;
 		}
 
 		// Get address to sring
-		v8 ToString()
+#ifdef SCE_PLATFORM_WINDOWS
+#ifdef SCE_PLATFORM_UNICODE
+		c16* ToString()
 		{
-			printf("%x", this);
+			c16 buffer[32];
+			wsprintf(buffer, L"%p", this);
+			c16* p_out = _wcsdup(buffer);
+			return p_out;
 		}
+#else
+		c8* ToString()
+		{
+			c8 buffer[32];
+			sprintf(buffer, "%p", this);
+			c8* p_out = _strdup(buffer);
+			return p_out;
+		}
+#endif // !SCE_PLATFORM_UNICODE
+#endif // !SCE_PLATFORM_WINDOWS
 
 	private:
 		static Obj* g_pInstance;
+	};
+
+	// ISingletonSlow
+	template<class Obj>
+	class SCEAPI ITSSingleton : public INonCopy, public INonMove
+	{
+	protected:
+		// Constructor(s)
+		ITSSingleton() = default;
+		virtual ~ITSSingleton() = default;
+
+	public:
+		// Retrieve the instance
+		static inline Obj& GetInstance()
+		{
+			static Obj g_pInstance;
+			return g_pInstance;
+		}
+
+		// Get address to sring
+#ifdef SCE_PLATFORM_WINDOWS
+#ifdef SCE_PLATFORM_UNICODE
+		c16* ToString()
+		{
+			c16 buffer[32];
+			wsprintf(buffer, L"%p", this);
+			c16* p_out = _wcsdup(buffer);
+			return p_out;
+		}
+#else
+		c8* ToString()
+		{
+			c8 buffer[32];
+			sprintf(buffer, "%p", this);
+			c8* p_out = _strdup(buffer);
+			return p_out;
+		}
+#endif // !SCE_PLATFORM_UNICODE
+#endif // !SCE_PLATFORM_WINDOWS
 	};
 }

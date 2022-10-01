@@ -10,14 +10,13 @@
 #include "defines.h"
 #include "using.h"
 
-#include "system/memory.h"
+//#include "system/memory.h"
 
 namespace sce
 {
 	class SCEAPI Application
 	{
 	private:
-		c8* m_Str;
 
 	public:
 		Application();

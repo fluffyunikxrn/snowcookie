@@ -5,8 +5,18 @@
 * Copyright: Copyright 2022 Chloe Tunrer
 */
 
+/*
+* ====================================================================
+* Include guard(s)
+* ====================================================================
+*/
 #pragma once
 
+/*
+* ====================================================================
+* Define: Configuration
+* ====================================================================
+*/
 #if defined(DEBUG) || defined(_DEBUG)
 #define SCE_PLATFORM_DEBUG 1
 #elif defined(RELEASE) || defined(_NDEBUG) || defined(NDEBUG)
@@ -15,21 +25,33 @@
 #error "unknown configuration"
 #endif
 
-// Character set(s)
+/*
+* ====================================================================
+* Define: Character set
+* ====================================================================
+*/
 #if defined(_UNICODE) || defined(UNICODE)
 #define SCE_PLATFORM_UNICODE 1
 #else
 #define SCE_PLATFORM_MULTIBYTE 1
 #endif // !Character set
 
-// Architecture
+/*
+* ====================================================================
+* Define: Architecture
+* ====================================================================
+*/
 #if defined(_M_AMD64) || defined(_M_X64)
 #define SCE_PLATFORM_64BIT 1
 #else
 #error "architechture not supported"
 #endif // !Architecture
 
-// Operating System(s)
+/*
+* ====================================================================
+* Define: Operating System
+* ====================================================================
+*/
 #if defined(_WIN64) || defined(_WIN32) 
 #include <Windows.h>
 #include <windowsx.h>
@@ -61,7 +83,11 @@
 #error "operating system not supported"
 #endif // !Operating System(s)
 
-// DLL-Linkage
+/*
+* ====================================================================
+* Define: DLL-Linkage
+* ====================================================================
+*/
 #if defined(SCE_EXPORT)	// export
 #if defined(SCE_PLATFORM_COMPILER_MSC)	// microsoft
 #define SCEAPI __declspec(dllexport)

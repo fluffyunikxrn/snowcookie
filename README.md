@@ -5,7 +5,8 @@
 --- 
 ### Contents
 1. Project setup
-2. Logger
+2. Memory Manager
+3. Logger
 --- 
 --- 
 ## 1. Project setup
@@ -31,4 +32,6 @@ In Engine `#pragma once` needs adding to all header files (.h), in defines use t
 In Sandbox create a `main` function and include `include.h` and create/destroy a `applciation` object in the main function, to ensure everything is working. The result should be a comnpiled Sandbox EXE file which calls the `application` object from the DLL and successfully runs.
 
 --- 
-## 2. Logger
+## 2. Memory Manager
+
+

@@ -42,8 +42,8 @@ project (engineLib)
 
     defines { "SCE_EXPORT" }
 
-    pchheader "sce_pch.h"
-    pchsource "src/sce_pch.cpp"
+    pchheader "pch.h"
+    pchsource "src/pch.cpp"
 
     includedirs { "%{prj.name}/src" }
     libdirs { "%{wks.location}/" .. bin .. engineLib }
@@ -60,7 +60,7 @@ project (engineLib)
         defines { "DIST", "NDEBUG" }
     
     filter "system:windows"
-        buildoptions  ("/Yc\"sce_pch.h\"")
+        buildoptions  ("/Yc\"pch.h\"")
 
     -- filter "system:linux"
 

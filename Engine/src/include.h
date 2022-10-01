@@ -7,13 +7,14 @@
 
 #pragma once
 
-// Initialisation headers
+/* Engine: Initialisation headers */
 #include "defines.h"
 #include "using.h"
 #include "patterns.h"
 
-// System headers
-#include "system/memory.h"
+/* Engine: System headers */
+#include "system/platform.h"
+//#include "system/memory.h"
 #include "system/logger.h"
 
 // Applciation headers

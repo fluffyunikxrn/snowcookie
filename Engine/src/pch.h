@@ -15,4 +15,8 @@
 #include <iomanip>
 #endif // !_IOMANIP_
 
+#ifndef _THREAD_
+#include <thread>
+#endif // !_THREAD_
+
 //#include <stack>
