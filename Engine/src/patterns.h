@@ -5,11 +5,25 @@
 * Copyright: Copyright 2022 Chloe Tunrer
 */
 
+/*
+* ===========================================================
+* Include guard(s)
+* ===========================================================
+*/
 #pragma once
 
+/*
+* ===========================================================
+* Include(s)
+* ===========================================================
+*/
 #include "defines.h"
-//#include "using.h"
 
+/*
+* ===========================================================
+* Namespace: sce
+* ===========================================================
+*/
 namespace sce
 {
 	// Class forward decleration(s)
@@ -19,8 +33,13 @@ namespace sce
 	template<class Obj>
 	class ISingleton;
 
-	// Class(s)
-	// None copyable
+	/* ==========================================================
+	* INonCopy class
+	* Virtual class which deletes the copying contructor and 
+	* assignment operator.
+	* Thread safe.
+	* Exported.
+	*/
 	class SCEAPI INonCopy
 	{
 	protected:
@@ -34,7 +53,13 @@ namespace sce
 		INonCopy& operator=(const INonCopy&) = delete;
 	};
 
-	// None moveable
+	/* ==========================================================
+	* INonMove class
+	* Virtual class which deletes the move contructor and
+	* assignment operator.
+	* Thread safe.
+	* Exported.
+	*/
 	class SCEAPI INonMove
 	{
 	protected:
@@ -48,7 +73,13 @@ namespace sce
 		INonMove& operator=(INonMove&&) = delete;
 	};
 
-	// Singleton
+	/* ==========================================================
+	* ISingleton class
+	* Virtual class which creates a thread safe singleton class,
+	* deletes the move contructor and assignment operator.
+	* Thread safe.
+	* Exported.
+	*/
 	template<class Obj>
 	class SCEAPI ISingleton : public INonCopy, public INonMove
 	{
@@ -72,16 +103,16 @@ namespace sce
 		}
 
 		// Get address to sring
-#ifdef SCE_PLATFORM_WINDOWS
-#ifdef SCE_PLATFORM_UNICODE
-		c16* ToString()
+//#ifdef SCE_PLATFORM_WINDOWS
+//#ifdef SCE_PLATFORM_UNICODE
+		c16* ToStringW()
 		{
 			c16 buffer[32];
 			wsprintf(buffer, L"%p", this);
 			c16* p_out = _wcsdup(buffer);
 			return p_out;
 		}
-#else
+//#else
 		c8* ToString()
 		{
 			c8 buffer[32];
@@ -89,10 +120,11 @@ namespace sce
 			c8* p_out = _strdup(buffer);
 			return p_out;
 		}
-#endif // !SCE_PLATFORM_UNICODE
-#endif // !SCE_PLATFORM_WINDOWS
+//#endif // !SCE_PLATFORM_UNICODE
+//#endif // !SCE_PLATFORM_WINDOWS
 
 	private:
+		// Instance 
 		static Obj* g_pInstance;
 	};
 
@@ -114,16 +146,16 @@ namespace sce
 		}
 
 		// Get address to sring
-#ifdef SCE_PLATFORM_WINDOWS
-#ifdef SCE_PLATFORM_UNICODE
-		c16* ToString()
+//#ifdef SCE_PLATFORM_WINDOWS
+//#ifdef SCE_PLATFORM_UNICODE
+		c16* ToStringW()
 		{
 			c16 buffer[32];
 			wsprintf(buffer, L"%p", this);
 			c16* p_out = _wcsdup(buffer);
 			return p_out;
 		}
-#else
+//#else
 		c8* ToString()
 		{
 			c8 buffer[32];
@@ -131,7 +163,7 @@ namespace sce
 			c8* p_out = _strdup(buffer);
 			return p_out;
 		}
-#endif // !SCE_PLATFORM_UNICODE
-#endif // !SCE_PLATFORM_WINDOWS
+//#endif // !SCE_PLATFORM_UNICODE
+//#endif // !SCE_PLATFORM_WINDOWS
 	};
 }

@@ -5,8 +5,18 @@
 * Copyright: Copyright 2022 Chloe Tunrer
 */
 
+/*
+* ====================================================================
+* Include guard(s)
+* ====================================================================
+*/
 #pragma once
 
+/*
+* ===========================================================
+* C/C++: Include(s)
+* ===========================================================
+*/
 #ifndef _IOSTREAM_
 #include <iostream>
 #endif // !_IOSTREAM_
@@ -18,5 +28,3 @@
 #ifndef _THREAD_
 #include <thread>
 #endif // !_THREAD_
-
-//#include <stack>
