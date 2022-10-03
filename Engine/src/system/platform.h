@@ -37,7 +37,7 @@
 * @param sFlag: Identifying tag
 * @return Newly aquired memory address
 */
-v8* operator new(size_t nSize, sce::MemoryTag sTag);
+v8* operator new(size_t nSize, sce::MemoryFlag sFlag);
 
 /*
 * ===========================================================
@@ -74,11 +74,12 @@ namespace sce::sys
 
 		static MemoryNode* m_sStartNode;
 		static size64 m_uLength;
+		static MemoryNodeStats m_sStats;
 
 	private:
 		/* Creates a new node and adds to node list
 		*/
-		static MemoryNode* CreateNode();
+		static MemoryNode* CreateNode(MemoryNode* pPrev = nullptr);
 
 		/* Deletes a specific node, joins the list up and 
 		* can be used to force the delete to take place, if
@@ -93,7 +94,7 @@ namespace sce::sys
 		/* Commit memory and statistics to free or new node
 		* @param pNode: Node to be processed
 		*/
-		static MemoryNode* CommitNode(MemoryNode* pNode, size64 nSize, MemoryTag sTag);
+		static MemoryNode* CommitNode(MemoryNode* pNode, size64 nSize, MemoryFlag sFlag);
 
 		/* Release memory from previously commited node
 		* @param pNode: Node to be processed
@@ -111,6 +112,13 @@ namespace sce::sys
 		*/
 		static MemoryNode* FindNode(v8* pAddr);
 
+		/* Retrieves a specific nodes starts to a string
+		* @param pNode: Node to find statistics for
+		* @return String containing the node statistics
+		*/
+		static const c16* NodeToString(MemoryNode* pNode);
+
+	protected:
 		/* Shut down all memory allocated throughout runtime
 		*/
 		static v8 ShutdownAllocator();
@@ -118,16 +126,33 @@ namespace sce::sys
 	public:
 		/* Allocates new memory on heap and returns it
 		* @param nSize: Size of allocation on stack
-		* @param sTag: Identifying name
+		* @param sFlag: Identifying name
 		* @return Address of newly created memory
 		*/
-		static v8* Allocate(size64 nSize, MemoryTag sTag);
+		static v8* Allocate(size64 nSize, MemoryFlag sFlag);
 
 		/* Deallocates previous allocated memory at specified
 		* address
 		* @param pAddr: Address to delete
 		*/
-		static v8 Deallocate(v8* pAddr);
+		static v8 Deallocate(v8* pAddr);		
+
+		/* Gets the size of the allocation on stack for input
+		* address
+		* @param pAddr: Address of tyhe memory
+		* @return Size of the alocation
+		*/
+		static size64 AddressStackSize(v8* pAddr);
+
+		//static size64 GetStat(u8 nStat);
+		//static MemoryNodeStats GetStats();		
+
+		//static c16* StatToString(u8 nStat);
+
+		/* Returns a string containing the stats for total 
+		* memory used
+		*/
+		static const c16* StatsToString();
 	};
 }
 
