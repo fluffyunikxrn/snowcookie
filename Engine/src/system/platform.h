@@ -22,160 +22,19 @@
 #include "defines.h"
 #include "using.h"
 #include "patterns.h"
-
-/*
-* ===========================================================
-* Operating System: None specific
-* ===========================================================
-*/
-
-/*
-* ===========================================================
-* Namespace: sce
-* ===========================================================
-*/
-namespace sce
-{
-	/*
-	* ===========================================================
-	* Operating System: None specific
-	* ===========================================================
-	*/
-
-	/* ==========================================================
-	* MEMORYTAG enumeration
-	* Defines flags for used and unsed memory
-	*/
-	typedef enum MEMORYTAG
-	{
-		MEMORY_UNKNOWN = 0,			// Unknown memory allocation
-
-		// Number(s)
-		MEMORY_SINTEGER8,
-		MEMORY_SINTEGER16,
-		MEMORY_SINTEGER32,
-		MEMORY_SINTEGER64,
-		MEMORY_UINTEGER8,
-		MEMORY_UINTEGER16,
-		MEMORY_UINTEGER32,
-		MEMORY_UINTEGER64,
-
-		// Floating point number(s)
-		MEMORY_FLOAT32,
-		MEMORY_FLOAT64,
-
-		// Character(s)
-		MEMORY_CHAR8,
-		MEMORY_CHAR16,
-
-		// Collection(s)
-		MEMORY_ARRAY,
-
-		// TODO: Add memory tags here
-		MEMORY_MAXTAGS				// Maximum number of tag types
-	} MemoryTag;
-}
-
-/*
-* ===========================================================
-* Namespace: sce::plfm
-* ===========================================================
-*/
-namespace sce::plfm
-{
-	/*
-	* ===========================================================
-	* Forward deceleration(s)
-	* ===========================================================
-	*/
-	class MemoryNodeList;			// Memory node collection
-	class PlatformAllocator;		// Allocator of memory
-	class Platform;					// Represents the platform the application is running on
-
-	/* ==========================================================
-	* NODESTATUS enumeration
-	* Defines flags for used and unsed memory
-	*/
-	typedef enum NODESTATUS
-	{
-		Used,
-		Free
-	} NodeStatus;
-
-	/* ==========================================================
-	* MEMORYNODE struct
-	* Keeps track of memory block chain
-	*/
-	typedef struct MEMORYNODE
-	{		
-		NodeStatus		e_Status;			// Status if free or occupied
-		size64			n_NodeSize;			// Size of the block in bytes
-		size64			n_AllocationSize;	// Size of the block in bytes
-		v8*				p_Data;				// Previous block in chain
-		MEMORYNODE*		p_Next;				// Next block in chain
-		MemoryTag		s_Tag;				// Memory tag
-	} MemoryNode;
-
-	/* ==========================================================
-	* MemoryNodeList class
-	* Maanges memory allocation globally for operating system.
-	* This class is not thread safe on it's own and must be used
-	* with the PlatformAllocator class.
-	* Not thread safe.
-	* Not exported.
-	*/
-	class MemoryNodeList
-	{
-	private:
-		static MemoryNode* m_sStartNode;		// Beginning of the node list
-		static size64 m_uLength;				// Length of the node list
-
-	protected:
-		/* Setups up the list for first time use
-		*/
-		static v8 SetupList();
-
-		/* Frees and nulls all requested memory
-		*/
-		static v8 ShutdownList();
-
-		/* Creates a new node
-		* @return Newly create node.
-		*/
-		static MemoryNode* NewNode();
-
-		/* Scan node list for an available node
-		* @return Free node if available or new end node
-		*/
-		static MemoryNode* ScanAvailable();
-
-		/* Applies the new data to node
-		* @param pNode: Node to apply data to
-		* @param pData: New data to be added
-		* @param nSize: Size of the stack memory
-		* @param sTag: Identifying tag
-		* @return True if successful
-		*/
-		static b8 AllocateData(MemoryNode* pNode, v8* pData, size64 nSize, sce::MemoryTag sTag);
-
-		/* Free the node data and set flag to free
-		* @param pAddr: Node to apply data to
-		* @return True if successful
-		*/
-		static b8 DeallocateData(v8* pAddr);
-	};
-}
+#include "memory.h"
 
 /*
 * ===========================================================
 * Override(s): New override
 * ===========================================================
-*/
+* Defined in platform.cpp
+/*
 
-/* SCE Engine specific new override which creates memory with 
+/* SCE Engine specific new override which creates memory with
 * an tag id tag to identify it.
 * @param nSize: size of stack memory
-* @param sTag: Identifying tag
+* @param sFlag: Identifying tag
 * @return Newly aquired memory address
 */
 v8* operator new(size_t nSize, sce::MemoryTag sTag);
@@ -186,48 +45,20 @@ v8* operator new(size_t nSize, sce::MemoryTag sTag);
 * ===========================================================
 */
 #if defined(SCE_PLATFORM_WINDOWS)
+
+/*
+* ===========================================================
+* Platform: Unicode
+* ===========================================================
+*/
 #if defined(SCE_PLATFORM_UNICODE)
 
 /*
 * ===========================================================
-* Windows specific include(s)
+* Namespace: sce::sys
 * ===========================================================
 */
-#ifndef _NEW_
-#include <new>
-#endif // !_NEW_
-
-/*
-* ===========================================================
-* Override(s): New and Delete
-* ===========================================================
-*/
-#pragma region newdelete
-// New overrides(s)
-_NODISCARD _Ret_notnull_ _Post_writable_byte_size_(nSize) _VCRT_ALLOCATOR
-v8* __CRTDECL operator new(size_t nSize);
-_NODISCARD _Ret_maybenull_ _Success_(return != NULL) _Post_writable_byte_size_(nSize) _VCRT_ALLOCATOR
-v8* __CRTDECL operator new(size_t nSize, ::std::nothrow_t const&) noexcept;
-_NODISCARD _Ret_notnull_ _Post_writable_byte_size_(nSize) _VCRT_ALLOCATOR
-v8* __CRTDECL operator new[](size_t nSize);
-_NODISCARD _Ret_maybenull_ _Success_(return != NULL) _Post_writable_byte_size_(nSize) _VCRT_ALLOCATOR
-v8* __CRTDECL operator new[](size_t nSize, ::std::nothrow_t const&) noexcept;
-
-// Delete overrides(s)
-v8 __CRTDECL operator delete(v8* pAddr) noexcept;
-v8 __CRTDECL operator delete(v8* pAddr, ::std::nothrow_t const&) noexcept;
-v8 __CRTDECL operator delete[](v8* pAddr) noexcept;
-v8 __CRTDECL operator delete[](v8* pAddr, ::std::nothrow_t const&) noexcept;
-v8 __CRTDECL operator delete(v8* pAddr, size_t _Size) noexcept;
-v8 __CRTDECL operator delete[](v8* pAddr, size_t _Size) noexcept;
-#pragma endregion newdelete
-
-	/*
-	* ===========================================================
-	* Namespace: sce::plfm
-	* ===========================================================
-	*/
-namespace sce::plfm
+namespace sce::sys
 {
 	/* ==========================================================
 	* PlatformAllocator class
@@ -235,50 +66,87 @@ namespace sce::plfm
 	* Thread safe.
 	* Not exported.
 	*/
-	class PlatformAllocator : public MemoryNodeList
+	class PlatformAllocator
 	{
 	private:
-		static const c16* m_szMutexName;			// Mutex name
-		static HANDLE m_hMutex;						// Mutex handle
-		static b8 m_bAllocInit;						// Get/Set if class is initialised
+		static LPCWSTR m_szMutexName;
+		static HANDLE m_hMutex;		
 
-	public:
-		/* Allocates memory to the heap
-		* @param nSize: Size of stack allocation
-		* @param sTag: Memory tag identifier
-		* @return Address if allocated memory
+		static MemoryNode* m_sStartNode;
+		static size64 m_uLength;
+
+	private:
+		/* Creates a new node and adds to node list
 		*/
-		static v8* AllocateMemory(SIZE_T nSize, MemoryTag sTag);
+		static MemoryNode* CreateNode();
 
-		/* Free a specific pointer address
-		* @param pAddr: Memory address to free
+		/* Deletes a specific node, joins the list up and 
+		* can be used to force the delete to take place, if
+		* the node isn't free. This will also release the 
+		* data stored.
+		* @param pNode: Node to be processed
+		* @param bForce: Indicate whether to force delete
+		* @return True if succeeded
 		*/
-		static v8 DeallocateMemory(v8* pAddr);
+		static v8 DeleteNode(MemoryNode* pNode, b8 bForce);
 
-	protected:
-		/* Sets up the allocator class 
+		/* Commit memory and statistics to free or new node
+		* @param pNode: Node to be processed
 		*/
-		static v8 SetupAllocator();
+		static MemoryNode* CommitNode(MemoryNode* pNode, size64 nSize, MemoryTag sTag);
 
-		/* Deallocatees all memory in the node list
+		/* Release memory from previously commited node
+		* @param pNode: Node to be processed
+		*/
+		static MemoryNode* ReleaseNode(MemoryNode* pNode, size64 nSize = 0);
+
+		/* Scan for a free node or create new one and link it
+		* @return Available or free node
+		*/
+		static MemoryNode* ScanAvailable();
+
+		/* Finds a specific node by address
+		* @param pAddr: Address of pointer/node to find
+		* @return Corresponding node, if no node found null
+		*/
+		static MemoryNode* FindNode(v8* pAddr);
+
+		/* Shut down all memory allocated throughout runtime
 		*/
 		static v8 ShutdownAllocator();
-	};
 
+	public:
+		/* Allocates new memory on heap and returns it
+		* @param nSize: Size of allocation on stack
+		* @param sTag: Identifying name
+		* @return Address of newly created memory
+		*/
+		static v8* Allocate(size64 nSize, MemoryTag sTag);
+
+		/* Deallocates previous allocated memory at specified
+		* address
+		* @param pAddr: Address to delete
+		*/
+		static v8 Deallocate(v8* pAddr);
+	};
+}
+
+/*
+* ===========================================================
+* Namespace: sce
+* ===========================================================
+*/
+namespace sce
+{
 	/* ==========================================================
 	* Platform class
-	* Manage the operatings system.
+	* Manage the operating system.
 	* Exported.
 	*/
-	class SCEAPI Platform : public ITSSingleton<Platform>, public PlatformAllocator
+	class SCEAPI Platform : public ITSSingleton<Platform>, public sce::sys::PlatformAllocator
 	{
+	private:
 	public:
-		/* Sets up the Platform class
-		*/
-		static v8 Setup();
-
-		/* Shuts down the platform class
-		*/
 		static v8 Shutdown();
 	};
 }

@@ -24,6 +24,7 @@ sce::Application::Application()
 #endif // !SCE_PLATFORM_DEBUG
 
 	// Start up memory class
+	Setup();
 }
 
 /* Application destructor
@@ -38,7 +39,7 @@ sce::Application::~Application()
 	Shutdown();
 }
 
-const u32 max = 1;
+const u32 max = 100;
 i32* f1Mem[max];
 u64* f2Mem[max];
 
@@ -47,15 +48,7 @@ v8 f1(const u32 c)
 	for (u32 u = 0; u < c; u++)
 	{
 		f1Mem[u] = new(sce::MemoryTag::MEMORY_SINTEGER32) i32;
-	}
-}
-
-v8 f2(const u32 c)
-{
-	for (u32 u = 0; u < c; u++)
-	{
-		f2Mem[u] = new(sce::MemoryTag::MEMORY_UINTEGER64) u64;
-		delete f2Mem[u];
+		//delete f1Mem[u];
 	}
 }
 
@@ -69,17 +62,14 @@ i32 sce::Application::Run()
 
 	std::thread t1(f1, max);
 	std::thread t2(f1, max);
-	std::thread t3(f2, max);
-	std::thread t4(f2, max);
-
-	f32* float32 = new(sce::MemoryTag::MEMORY_FLOAT32) f32;
-	c16* char16 = new(sce::MemoryTag::MEMORY_CHAR16) c16;
+	std::thread t3(f1, max);
+	std::thread t4(f1, max);
 
 	t1.join();
 	t2.join();
 	t3.join();
 	t4.join();
-	
+
 	return 0;
 }
 
@@ -87,12 +77,12 @@ i32 sce::Application::Run()
 */
 v8 sce::Application::Setup()
 {
-
+	//sce::Platform::GetInstance().Setup();
 }
 
 /* Shuts down the class
 */
 v8 sce::Application::Shutdown()
 {
-	sce::plfm::Platform::Shutdown();
+	sce::Platform::GetInstance().Shutdown();
 }

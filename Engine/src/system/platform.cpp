@@ -17,22 +17,27 @@
 
 /* SCE Engine specific new override which creates memory with
 * an tag id tag to identify it.
+* Defined in memory.h.
 * @param nSize: size of stack memory
-* @param sTag: Identifying tag
+* @param sId: Identifying tag
 * @return Newly aquired memory address
 */
 v8* operator new(size_t nSize, sce::MemoryTag sTag)
 {
-	return sce::plfm::Platform::GetInstance().AllocateMemory(nSize, sTag);
+#ifdef SCE_PLATFORM_DEBUG
+	printf("%s\n", __FUNCTION__);
+#endif // !SCE_PLATFORM_DEBUG
+
+	return sce::Platform::GetInstance().Allocate(nSize, sTag);
 }
 
 /*
 * ===========================================================
-* Operating System: Windows
+* Platform: Windows
 * ===========================================================
 */
 #if defined(SCE_PLATFORM_WINDOWS)
-#if defined(SCE_PLATFORM_UNICODE)
+
 /*
 * ===========================================================
 * Override(s): New and Delete
@@ -43,62 +48,109 @@ v8* operator new(size_t nSize, sce::MemoryTag sTag)
 _NODISCARD _Ret_notnull_ _Post_writable_byte_size_(nSize) _VCRT_ALLOCATOR
 v8* __CRTDECL operator new(size_t nSize)
 {
-	return sce::plfm::Platform::GetInstance().AllocateMemory(nSize, sce::MemoryTag::MEMORY_UNKNOWN);
+#ifdef SCE_PLATFORM_DEBUG
+	printf("%s\n", __FUNCTION__);
+#endif // !SCE_PLATFORM_DEBUG
+
+	return sce::Platform::GetInstance().Allocate(nSize, sce::MemoryTag::MEMORY_UNKNOWN);
 }
 
 _NODISCARD _Ret_maybenull_ _Success_(return != NULL) _Post_writable_byte_size_(nSize) _VCRT_ALLOCATOR
 v8* __CRTDECL operator new(size_t nSize, ::std::nothrow_t const&) noexcept
 {
-	return sce::plfm::Platform::GetInstance().AllocateMemory(nSize, sce::MemoryTag::MEMORY_UNKNOWN);
+#ifdef SCE_PLATFORM_DEBUG
+	printf("%s\n", __FUNCTION__);
+#endif // !SCE_PLATFORM_DEBUG
+
+	return sce::Platform::GetInstance().Allocate(nSize, sce::MemoryTag::MEMORY_UNKNOWN);
 }
 
 _NODISCARD _Ret_notnull_ _Post_writable_byte_size_(nSize) _VCRT_ALLOCATOR
 v8* __CRTDECL operator new[](size_t nSize)
 {
-	return sce::plfm::Platform::GetInstance().AllocateMemory(nSize, sce::MemoryTag::MEMORY_UNKNOWN);
+#ifdef SCE_PLATFORM_DEBUG
+	printf("%s\n", __FUNCTION__);
+#endif // !SCE_PLATFORM_DEBUG
+
+	return sce::Platform::GetInstance().Allocate(nSize, sce::MemoryTag::MEMORY_UNKNOWN);
 }
 
 _NODISCARD _Ret_maybenull_ _Success_(return != NULL) _Post_writable_byte_size_(nSize) _VCRT_ALLOCATOR
 v8* __CRTDECL operator new[](size_t nSize, ::std::nothrow_t const&) noexcept
 {
-	return sce::plfm::Platform::GetInstance().AllocateMemory(nSize, sce::MemoryTag::MEMORY_UNKNOWN);
+#ifdef SCE_PLATFORM_DEBUG
+	printf("%s\n", __FUNCTION__);
+#endif // !SCE_PLATFORM_DEBUG
+
+	return sce::Platform::GetInstance().Allocate(nSize, sce::MemoryTag::MEMORY_UNKNOWN);
 }
 
 // Delete overrides(s)
-v8 __CRTDECL operator delete(v8* pAddr) noexcept
+v8 __CRTDECL operator delete(v8 * pAddr) noexcept
 {
-	sce::plfm::Platform::GetInstance().DeallocateMemory(pAddr);
+#ifdef SCE_PLATFORM_DEBUG
+	printf("%s\n", __FUNCTION__);
+#endif // !SCE_PLATFORM_DEBUG
+
+	sce::Platform::GetInstance().Deallocate(pAddr);
 }
 
-v8 __CRTDECL operator delete(v8* pAddr, ::std::nothrow_t const&) noexcept
+v8 __CRTDECL operator delete(v8 * pAddr, ::std::nothrow_t const&) noexcept
 {
-	sce::plfm::Platform::GetInstance().DeallocateMemory(pAddr);
+#ifdef SCE_PLATFORM_DEBUG
+	printf("%s\n", __FUNCTION__);
+#endif // !SCE_PLATFORM_DEBUG
+
+	sce::Platform::GetInstance().Deallocate(pAddr);
 }
 
 v8 __CRTDECL operator delete[](v8* pAddr) noexcept
 {
-	sce::plfm::Platform::GetInstance().DeallocateMemory(pAddr);
+#ifdef SCE_PLATFORM_DEBUG
+	printf("%s\n", __FUNCTION__);
+#endif // !SCE_PLATFORM_DEBUG
+
+	sce::Platform::GetInstance().Deallocate(pAddr);
 }
 
 v8 __CRTDECL operator delete[](v8* pAddr, ::std::nothrow_t const&) noexcept
 {
-	sce::plfm::Platform::GetInstance().DeallocateMemory(pAddr);
+#ifdef SCE_PLATFORM_DEBUG
+	printf("%s\n", __FUNCTION__);
+#endif // !SCE_PLATFORM_DEBUG
+
+	sce::Platform::GetInstance().Deallocate(pAddr);
 }
 
-v8 __CRTDECL operator delete(v8* pAddr, size_t _Size) noexcept
+v8 __CRTDECL operator delete(v8 * pAddr, size_t _Size) noexcept
 {
-	sce::plfm::Platform::GetInstance().DeallocateMemory(pAddr);
+#ifdef SCE_PLATFORM_DEBUG
+	printf("%s\n", __FUNCTION__);
+#endif // !SCE_PLATFORM_DEBUG
+
+	sce::Platform::GetInstance().Deallocate(pAddr);
 }
 
 v8 __CRTDECL operator delete[](v8* pAddr, size_t _Size) noexcept
 {
-	sce::plfm::Platform::GetInstance().DeallocateMemory(pAddr);
+#ifdef SCE_PLATFORM_DEBUG
+	printf("%s\n", __FUNCTION__);
+#endif // !SCE_PLATFORM_DEBUG
+
+	sce::Platform::GetInstance().Deallocate(pAddr);
 }
 #pragma endregion newdelete
 
+/*
+* ===========================================================
+* Platform: Unicode
+* ===========================================================
+*/
+#if defined(SCE_PLATFORM_UNICODE)
 /* ==========================================================
-* MemoryNodeList class
-* Maanges memory allocation globally for operating system.
+* PlatformAllocator class
+* Manages memory allocation globally for operating system.
+* Thread safe.
 * Not exported.
 */
 
@@ -107,438 +159,437 @@ v8 __CRTDECL operator delete[](v8* pAddr, size_t _Size) noexcept
 * Static initialisation(s)
 * ===========================================================
 */
-sce::plfm::MemoryNode* sce::plfm::MemoryNodeList::m_sStartNode		= nullptr;			// Beginning of the node list
-size64 sce::plfm::MemoryNodeList::m_uLength							= 0;				// Length of the node list
+LPCWSTR sce::sys::PlatformAllocator::m_szMutexName					= L"win_uc_alloc_mutex";
+HANDLE sce::sys::PlatformAllocator::m_hMutex						= CreateMutex(NULL, FALSE, m_szMutexName);
+sce::sys::MemoryNode* sce::sys::PlatformAllocator::m_sStartNode		= nullptr;
+size64 sce::sys::PlatformAllocator::m_uLength						= 0;
 
-/* Setups up the list for first time use
+/* Creates a new node and adds to node list
 */
-v8 sce::plfm::MemoryNodeList::SetupList()
+sce::sys::MemoryNode* sce::sys::PlatformAllocator::CreateNode()
 {
 #ifdef SCE_PLATFORM_DEBUG
 	printf("%s\n", __FUNCTION__);
 #endif // !SCE_PLATFORM_DEBUG
 
-	// Check if beginning node is null
-	if (!m_sStartNode)
-	{
-		// Create new node
-		m_sStartNode = NewNode();
-	}
-}
+	MemoryNode* p_node = static_cast<MemoryNode*>(VirtualAlloc(NULL, sizeof(MemoryNode), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE));
 
-/* Frees and nulls all requested memory
-*/
-v8 sce::plfm::MemoryNodeList::ShutdownList()
-{
-#ifdef SCE_PLATFORM_DEBUG
-	printf("%s\n", __FUNCTION__);
-#endif // !SCE_PLATFORM_DEBUG
-
-	MemoryNode* p_head = nullptr;			// Head node
-	MemoryNode* p_next = nullptr;			// Next node
-	
-	// Set head node to beginning node
-	p_head = m_sStartNode;
-
-	// Cycle through the nodes
-	while (p_head)
-	{
-		// Set the next node
-		p_next = p_head->p_Next;
-
-		// Check if node data and status are free
-		if (p_head->p_Data && p_head->e_Status == Used)
-		{
-			// Free data memory
-			if (!VirtualFree(p_head->p_Data, NULL, MEM_RELEASE))
-			{
-				// Handle errors
-				printf("%s: %s\n", __FUNCTION__, "failed to release (data) memory");
-				exit(-1);
-			}
-
-			p_head->p_Data = nullptr;			// Set node data to null
-			p_head->e_Status = Free;			// Set status flag to Free
-		}
-
-		// Free node memory
-		if (!VirtualFree(p_head, NULL, MEM_RELEASE))
-		{
-			// Handle errors
-			printf("%s: %s\n", __FUNCTION__, "failed to release (node) memory");
-			exit(-1);
-		}
-
-		p_head = nullptr;		// Set node memory to null
-		p_head = p_next;		// Set head to next node address
-	}
-}
-
-/* Creates a new node
-* @return Newly create node.
-*/
-sce::plfm::MemoryNode* sce::plfm::MemoryNodeList::NewNode()
-{
-#ifdef SCE_PLATFORM_DEBUG
-	printf("%s\n", __FUNCTION__);
-#endif // !SCE_PLATFORM_DEBUG
-
-	MemoryNode* p_node = nullptr;		// New node
-	
-	// Create new node and store address
-	p_node = static_cast<MemoryNode*>(VirtualAlloc(NULL, sizeof(MemoryNode), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE));
-
-	// Check if node was created successfully
 	if (!p_node)
 	{
-		// Handle errors
-		printf("%s: %s\n", __FUNCTION__, "failed to create initial node");
+		printf("%s: %s\n", __FUNCTION__, "failed to MemoryNode");
 		exit(-1);
 	}
 
-	p_node->e_Status			= Free;							// Set node status
-	p_node->n_AllocationSize	= 0;							// Set node allocation size
-	p_node->n_NodeSize			= sizeof(MemoryNode);			// Set node size
-	p_node->p_Data				= nullptr;						// Set node data
-	p_node->p_Next				= nullptr;						// Set node next node
-	p_node->s_Tag				= MemoryTag::MEMORY_UNKNOWN;	// Set node identifying tag
+	p_node->e_Status			= Free;
+	p_node->n_AllocationSize	= 0;
+	p_node->n_NodeSize			= sizeof(MemoryNode);
+	p_node->p_Data				= nullptr;
+	p_node->p_Next				= nullptr;
+	p_node->p_Prev				= nullptr;
+	p_node->s_Tag				= MemoryTag::MEMORY_UNKNOWN;
 
-	// Update length
 	m_uLength++;
 
 	return p_node;
 }
 
-/* Scan node list for an available node
-* @return Free node if available or new end node
+/* Deletes a specific node, joins the list up and
+* can be used to force the delete to take place, if
+* the node isn't free. This will also release the
+* data stored.
+* @param pNode: Node to be processed
+* @param bForce: Indicate whether to force delete
+* @return True if succeeded
 */
-sce::plfm::MemoryNode* sce::plfm::MemoryNodeList::ScanAvailable()
+v8 sce::sys::PlatformAllocator::DeleteNode(MemoryNode* pNode, b8 bForce)
 {
-	MemoryNode* p_head = nullptr;			// Head node
+#ifdef SCE_PLATFORM_DEBUG
+	printf("%s\n", __FUNCTION__);
+#endif // !SCE_PLATFORM_DEBUG
 
-	// Set head node to beginning node
-	p_head = m_sStartNode;
+	DWORD dw_mutexResult	= 0;
+	MemoryNode* p_proc		= nullptr;
+	MemoryNode* p_next		= nullptr;
+	MemoryNode* p_prev		= nullptr;
+	b8 b_start				= false;
 
-	// Cycle through the nodes
-	while (p_head)
+	if (m_hMutex)
 	{
-		// Check if node data and status are free
-		if (!p_head->p_Data && p_head->e_Status == Free)
-		{
-			break;
-		}
-
-		// Check if node needs extending
-		if (!p_head->p_Next)
-		{
-			p_head->p_Next = NewNode();			// Create new node
-			p_head = p_head->p_Next;			// Set head to next node
-			break;
-		}
-
-		p_head = p_head->p_Next;				// Set head to next node	
+		dw_mutexResult = WaitForSingleObject(m_hMutex, INFINITE);
 	}
 
-	return p_head;
-}
+	p_proc = pNode;
 
-/* Applies the new data to node
-* @param pNode: Node to apply data to
-* @param pData: New data to be added
-* @param nSize: Size of the stack memory
-* @return True if successful
-*/
-b8 sce::plfm::MemoryNodeList::AllocateData(MemoryNode* pNode, v8* pData, size64 nSize, sce::MemoryTag sTag)
-{
-	// Check if node data and status are free
-	if (!pNode->p_Data && pNode->e_Status == Free)
+	if (!p_proc)
 	{
-		// Set node data
-		pNode->p_Data = pData;
+		printf("%s: %s\n", __FUNCTION__, "processing node is null");
+		exit(-1);
+	}
 
-		// Check if data storage was successful
-		if (!pNode->p_Data)
+	if (p_proc == m_sStartNode)
+	{
+		b_start = true;
+	}
+	else
+	{
+		if (p_proc->p_Prev)
 		{
-			// Handle errors
-			printf("%s: %s\n", __FUNCTION__, "pNode->p_Data is null");
-			exit(-1);
-			return false;
+			p_prev = p_proc->p_Prev;
+		}
+
+		if (p_proc->p_Next)
+		{
+			p_next = p_proc->p_Next;
 		}
 	}
 
-	pNode->n_AllocationSize = nSize;		// Set allocation size
-	pNode->s_Tag = sTag;			// Set tag id type
-	pNode->e_Status = Used;			// Set status of node
-	return true;
+	if (bForce && p_proc->p_Data && p_proc->e_Status == Used)
+	{
+		p_proc = ReleaseNode(p_proc);
+	}
+
+	if (!VirtualFree(p_proc, NULL, MEM_RELEASE))
+	{
+		printf("%s: %s %d\n", __FUNCTION__, "VirtualAlloc:", GetLastError());
+		exit(-1);
+	}
+
+	p_proc = nullptr;
+
+	if (b_start)
+	{
+		m_sStartNode = p_next;
+	}
+	else
+	{
+		if (p_prev)
+		{
+			p_prev->p_Next = p_next;
+		}
+	}
+
+	if (m_hMutex)
+	{
+		dw_mutexResult = ReleaseMutex(m_hMutex);
+	}
 }
 
-/* Free the node data and set flag to free
-* @param pNode: Node to apply data to
-* @param pData: New data to be added
-* @param nSize: Size of the stack memory
-* @return True if successful
+/* Commit memory and statistics to free or new node
+* @param pNode: Node to be processed
 */
-b8 sce::plfm::MemoryNodeList::DeallocateData(v8* pAddr)
+sce::sys::MemoryNode* sce::sys::PlatformAllocator::CommitNode(MemoryNode* pNode, size64 nSize, MemoryTag sTag)
 {
-	MemoryNode* p_head = nullptr;			// Head node
+#ifdef SCE_PLATFORM_DEBUG
+	printf("%s\n", __FUNCTION__);
+#endif // !SCE_PLATFORM_DEBUG
 
-	// Set head node to beginning node
+	MemoryNode* p_proc = nullptr;
+
+	p_proc = pNode;	
+
+	if (!p_proc)
+	{
+		printf("%s: %s\n", __FUNCTION__, "head is null");
+		exit(-1);
+	}
+
+	if (!(p_proc->p_Data = VirtualAlloc(NULL, nSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE)))
+	{
+		printf("%s: %s %d\n", __FUNCTION__, "VirtualAlloc:", GetLastError());
+		exit(-1);
+	}
+
+	p_proc->e_Status			= Used;
+	p_proc->n_AllocationSize	= nSize;
+	p_proc->s_Tag				= sTag;
+
+	return p_proc;
+}
+
+/* Release memory from previously commited node
+* @param pNode: Node to be processed
+*/
+sce::sys::MemoryNode* sce::sys::PlatformAllocator::ReleaseNode(MemoryNode* pNode, size64 nSize)
+{
+#ifdef SCE_PLATFORM_DEBUG
+	printf("%s\n", __FUNCTION__);
+#endif // !SCE_PLATFORM_DEBUG
+
+	MemoryNode* p_proc = nullptr;
+	
+	p_proc = pNode;
+
+	if (!p_proc)
+	{
+		printf("%s: %s\n", __FUNCTION__, "Process node is null");
+		exit(-1);
+	}
+
+	if (!VirtualFree(p_proc->p_Data, NULL, MEM_RELEASE))
+	{
+		printf("%s: %s %d\n", __FUNCTION__, "VirtualAlloc:", GetLastError());
+		exit(-1);
+	}
+
+	p_proc->e_Status			= Free;
+	p_proc->n_AllocationSize	= 0;
+	p_proc->p_Data				= nullptr;
+	p_proc->s_Tag				= MemoryTag::MEMORY_UNKNOWN;
+
+	return p_proc;
+}
+
+/* Scan for a free node or create new one and link it
+* @return Available or free node
+*/
+sce::sys::MemoryNode* sce::sys::PlatformAllocator::ScanAvailable()
+{
+#ifdef SCE_PLATFORM_DEBUG
+	printf("%s\n", __FUNCTION__);
+#endif // !SCE_PLATFORM_DEBUG
+
+	MemoryNode* p_proc = nullptr;
+	MemoryNode* p_head = nullptr;
+
+	if (!m_sStartNode)
+	{
+		m_sStartNode = p_proc = CreateNode();
+		return p_proc;
+	}
+
 	p_head = m_sStartNode;
 
-	// Cycle through the nodes
 	while (p_head->p_Next)
 	{
-		// Test for address match
-		if (p_head->p_Data == pAddr)
-		{
-			break;
-		}
-
-		// Set head node to next node
 		p_head = p_head->p_Next;
 	}
 
-	// If the node is used delete
-	if (p_head->e_Status == Used)
+	if (p_head->p_Data == nullptr && p_head->e_Status == Free)
 	{
-		// Free data memory
-		if (!VirtualFree(p_head->p_Data, NULL, MEM_RELEASE))
+		p_proc = p_head;
+
+		if (!p_proc)
 		{
-			// Handle errors
-			printf("%s: %s\n", __FUNCTION__, "failed to release (data) memory");
-			exit(-1);
-
-			return false;
-		}
-
-		p_head->p_Data		= nullptr;				// Set node data to null
-		p_head->e_Status	= Free;					// Set node status to Free
-	}
-
-	return true;
-}
-
-/* ==========================================================
-* PlatformAllocator class
-* Manages memory allocation globally for operating system.
-* Not exported.
-*/
-
-/*
-* ===========================================================
-* Static initialisation(s)
-* ===========================================================
-*/
-const c16* sce::plfm::PlatformAllocator::m_szMutexName		= L"sce_plfm_alloc_mtx";			// Mutex name
-HANDLE sce::plfm::PlatformAllocator::m_hMutex				= nullptr;							// Mutex handle
-b8 sce::plfm::PlatformAllocator::m_bAllocInit				= false;							// Get/Set if class is initialised
-
-/* Allocates memory to the heap
-* @param nSize: Size of stack allocation
-* @param tag: Memory tag identifier
-* @return Address if allocated memory
-*/
-v8* sce::plfm::PlatformAllocator::AllocateMemory(SIZE_T nSize, sce::MemoryTag sTag)
-{
-#ifdef SCE_PLATFORM_DEBUG
-	wprintf(L"%s\n", __FUNCTIONW__);
-#endif // !SCE_PLATFORM_DEBUG
-
-	DWORD dw_mutexCode = 0;					// Mutex response code
-
-	// Check for valid mutex
-	if (m_hMutex)
-	{
-		// Wait for mutex here
-		dw_mutexCode = WaitForSingleObject(m_hMutex, INFINITE);
-	}
-	
-	// Check if Allocator is set up
-	SetupAllocator();
-
-	MemoryNode* p_node = nullptr;			// Head node
-
-	// Scan for available node
-	p_node = ScanAvailable();
-
-	// Check if node is available
-	if (!p_node)
-	{
-		// Handle errors
-		wprintf(L"%s: %s\n", __FUNCTIONW__, L"p_node is null");
-		exit(-1);
-	}
-
-	// Validate mutex code
-	switch(dw_mutexCode)
-	{ 
-	case WAIT_ABANDONED:
-	{
-		// Handle errors
-		wprintf(L"%s: %s\n", __FUNCTIONW__, L"Mutex abandoned event");
-		exit(-1);
-	}
-	break;
-	case WAIT_OBJECT_0:	
-	{
-		// Allocate new data memory address
-		v8* p_data = VirtualAlloc(NULL, nSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-
-		// Allocate new data to available node
-		AllocateData(p_node, p_data, nSize, sTag);
-	}
-	break;
-	case WAIT_TIMEOUT:
-	{
-		// Handle errors
-		wprintf(L"%s: %s\n", __FUNCTIONW__, L"Mutex timed out event");
-		exit(-1);
-	}
-	break;
-	case WAIT_FAILED:
-	{
-		// Handle errors
-		wprintf(L"%s: %s\n", __FUNCTIONW__, L"Mutex failed event");
-		exit(-1);
-	}
-	break;
-	}
-
-	// Check for valid mutex
-	if (m_hMutex)
-	{
-		// Release mutex
-		ReleaseMutex(m_hMutex);
-	}
-
-	return p_node->p_Data;
-}
-
-/* Free a specific pointer address
-* @param pAddr: Memory address to free
-*/
-v8 sce::plfm::PlatformAllocator::DeallocateMemory(v8* pAddr)
-{
-#ifdef SCE_PLATFORM_DEBUG
-	wprintf(L"%s\n", __FUNCTIONW__);
-#endif // !SCE_PLATFORM_DEBUG
-
-	DWORD dw_mutexCode = 0;					// Mutex response code
-
-	// Check for valid mutex
-	if (m_hMutex)
-	{
-		// Wait for mutex here
-		dw_mutexCode = WaitForSingleObject(m_hMutex, INFINITE);
-	}
-
-	// Validate mutex code
-	switch (dw_mutexCode)
-	{
-	case WAIT_ABANDONED:
-	{
-		// Handle errors
-		wprintf(L"%s: %s\n", __FUNCTIONW__, L"Mutex abandoned");
-		exit(-1);
-	}break;
-	case WAIT_OBJECT_0: {
-		if (!pAddr)
-		{
-			// Handle errors
-			wprintf(L"%s: %s\n", __FUNCTIONW__, L"pAddr is null");
+			printf("%s: %s\n", __FUNCTION__, "process node is null");
 			exit(-1);
 		}
 
-		// Deallocate data memory from storage node
-		DeallocateData(pAddr);
-	}break;
+		return p_proc;
+	}
+
+	if (p_head->p_Next == nullptr)
+	{
+		p_head->p_Next = CreateNode();
+		p_proc = p_head->p_Next;
+
+		if (!p_proc)
+		{
+			printf("%s: %s\n", __FUNCTION__, "process node is null");
+			exit(-1);
+		}
+
+		return p_proc;
+	}
+
+	return nullptr;
+}
+
+/* Finds a specific node by address
+* @param pAddr: address of pointer/node to find
+* @return Corresponding node, if no node found null
+*/
+sce::sys::MemoryNode* sce::sys::PlatformAllocator::FindNode(v8* pAddr)
+{
+#ifdef SCE_PLATFORM_DEBUG
+	printf("%s\n", __FUNCTION__);
+#endif // !SCE_PLATFORM_DEBUG
+
+	MemoryNode* p_proc	= nullptr;
+	MemoryNode* p_head	= nullptr;
+	v8* p_addr			= nullptr;
+
+	p_head = m_sStartNode;
+	p_addr = pAddr;
+
+	if (!p_head)
+	{
+		printf("%s: %s\n", __FUNCTION__, "head node is null");
+		exit(-1);
+	}
+
+	if (!p_addr)
+	{
+		printf("%s: %s\n", __FUNCTION__, "address is null");
+		exit(-1);
+	}
+
+	while (p_head)
+	{
+		if (p_head->p_Data == p_addr)
+		{
+			p_proc = p_head;
+			break;
+		}
+
+		p_head = p_head->p_Next;
+	}
+
+	if (!p_proc)
+	{
+		printf("%s: %s\n", __FUNCTION__, "processing node is null");
+		exit(-1);
+	}
+
+	return p_proc;
+}
+
+/* Shut down all memory allocated throughout runtime
+*/
+v8 sce::sys::PlatformAllocator::ShutdownAllocator()
+{
+	DWORD dw_mutexResult	= 0;
+	MemoryNode* p_head		= nullptr;
+	MemoryNode* p_next		= nullptr;
+
+	p_head = m_sStartNode;
+
+	while (p_head)
+	{
+		p_next = p_head->p_Next;
+
+		DeleteNode(p_head, true);
+
+		p_head = p_next;
+	}
+}
+
+/* Allocates new memory on heap and returns it
+* @param nSize: Size of allocation on stack
+* @param sTag: Identifying name
+* @return address of newly created memory
+*/
+v8* sce::sys::PlatformAllocator::Allocate(size64 nSize, MemoryTag sTag)
+{
+#ifdef SCE_PLATFORM_DEBUG
+	printf("%s\n", __FUNCTION__);
+#endif // !SCE_PLATFORM_DEBUG
+
+	DWORD dw_mutexResult	= 0;
+	MemoryNode* p_proc		= nullptr;
+	MemoryNode* p_head		= nullptr;
+
+	if (m_hMutex)
+	{
+		dw_mutexResult = WaitForSingleObject(m_hMutex, INFINITE);
+	}
+
+	switch (dw_mutexResult)
+	{
+	case WAIT_ABANDONED:
+	{
+		printf("%s: %s\n", __FUNCTION__, "mutex abandoned");
+		exit(-1);
+	} break;
+	case WAIT_OBJECT_0:
+	{
+		p_head = ScanAvailable();
+
+		if (!p_head)
+		{
+			printf("%s: %s\n", __FUNCTION__, "mutex ");
+			exit(-1);
+		}
+
+		p_proc = CommitNode(p_head, nSize, sTag);		
+	} break;
 	case WAIT_TIMEOUT:
 	{
-		// Handle errors
-		wprintf(L"%s: %s\n", __FUNCTIONW__, L"Mutex timed out");
+		printf("%s: %s\n", __FUNCTION__, "mutex timed out");
 		exit(-1);
-	}break;
+	} break;
 	case WAIT_FAILED:
 	{
-		// Handle errors
-		wprintf(L"%s: %s\n", __FUNCTIONW__, L"Mutex failed");
+		printf("%s: %s\n", __FUNCTION__, "mutex failed");
 		exit(-1);
-	}break;
+	} break;
 	}
 
-	// Check for valid mutex
 	if (m_hMutex)
 	{
-		// Release mutex
-		ReleaseMutex(m_hMutex);
+		dw_mutexResult = ReleaseMutex(m_hMutex);
 	}
-}
 
-/* Sets up the allocator class */
-v8 sce::plfm::PlatformAllocator::SetupAllocator()
-{
-#ifdef SCE_PLATFORM_DEBUG
-	wprintf(L"%s\n", __FUNCTIONW__);
-#endif // !SCE_PLATFORM_DEBUG
-
-	// Test if class is initilised
-	if (!m_bAllocInit)
+	if (!p_proc)
 	{
-		m_hMutex = CreateMutex(NULL, FALSE, m_szMutexName);		// Initalise mutext
-		SetupList();											// Set up the NodeList
-
-		m_bAllocInit = true;									// Update initalisation status
+		printf("%s: %s\n", __FUNCTION__, "processing node is null");
+		exit(-1);
 	}
+
+	if (!p_proc->p_Data)
+	{
+		printf("%s: %s\n", __FUNCTION__, "processing (Data) node is null");
+		exit(-1);
+	}
+
+	return p_proc->p_Data;
 }
 
-/* Deallocatees all memory in the node list
+/* Deallocates previous allocated memory at specified
+* address
+* @param pAddr: address to delete
 */
-v8 sce::plfm::PlatformAllocator::ShutdownAllocator()
+v8 sce::sys::PlatformAllocator::Deallocate(v8* pAddr)
 {
-	// Wait for mutex here
-	WaitForSingleObject(m_hMutex, INFINITE);
-
 #ifdef SCE_PLATFORM_DEBUG
-	wprintf(L"%s\n", __FUNCTIONW__);
+	printf("%s\n", __FUNCTION__);
 #endif // !SCE_PLATFORM_DEBUG
 
-	ShutdownList();
+	DWORD dw_mutexResult	= 0;
+	MemoryNode* p_proc		= nullptr;
+	v8* p_addr				= nullptr;
 
 	if (m_hMutex)
 	{
-		ReleaseMutex(m_hMutex);
-		CloseHandle(m_hMutex);
+		dw_mutexResult = WaitForSingleObject(m_hMutex, INFINITE);
 	}
 
-	m_bAllocInit = false;
+	p_addr = pAddr;
+
+	if (!p_addr)
+	{
+		printf("%s: %s\n", __FUNCTION__, "address is null");
+		exit(-1);
+	}
+
+	p_proc = FindNode(p_addr);
+
+	if (!p_proc)
+	{
+		printf("%s: %s\n", __FUNCTION__, "processing node is null");
+		exit(-1);
+	}
+
+	ReleaseNode(p_proc);
+
+	if (m_hMutex)
+	{
+		dw_mutexResult = ReleaseMutex(m_hMutex);
+	}
 }
 
 /* ==========================================================
 * Platform class
-* Manage the operatings system.
+* Manage the operating system.
 * Exported.
 */
-
-/* Sets up the allocator class
-*/
-v8 sce::plfm::Platform::Setup()
+v8 sce::Platform::Shutdown()
 {
 #ifdef SCE_PLATFORM_DEBUG
-	wprintf(L"%s\n", __FUNCTIONW__);
+	printf("%s\n", __FUNCTION__);
 #endif // !SCE_PLATFORM_DEBUG
 	
-}
-
-/* Shuts down the platform class
-*/
-v8 sce::plfm::Platform::Shutdown()
-{
-#ifdef SCE_PLATFORM_DEBUG
-	wprintf(L"%s\n", __FUNCTIONW__);
-#endif // !SCE_PLATFORM_DEBUG
-
 	ShutdownAllocator();
 }
+
 #endif	// SCE_PLATFORM_UNICODE
 #endif	// SCE_PLATFORM_WINDOWS
-

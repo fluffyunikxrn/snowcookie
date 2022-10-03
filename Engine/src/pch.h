@@ -28,3 +28,11 @@
 #ifndef _THREAD_
 #include <thread>
 #endif // !_THREAD_
+
+#ifndef _STRING_
+#include <string>
+#endif // !_STRING_
+
+#ifndef _SSTREAM_
+#include <sstream>
+#endif // !_SSTREAM_

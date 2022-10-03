@@ -12,8 +12,6 @@
 */
 #include "sce_engine.h"
 
-#include <iomanip>
-
 /* ==========================================================
 * Sandbox <- Application class
 * Base class for all applications within the executable
