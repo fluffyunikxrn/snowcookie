@@ -39,20 +39,44 @@ sce::Application::~Application()
 	Shutdown();
 }
 
-const u32 max = 1000;
+const u32 max = 1;
 u64* f1Mem[max];
 
 v8 f1(const u32 c)
 {
 	for (u32 u = 0; u < c; u++)
 	{
-		f1Mem[u] = new(sce::MemoryFlag::MEMORY_UINTEGER64) u64;
-		//delete f1Mem[u];
+		//f1Mem[u] = new(sce::MemoryFlag::MEMORY_UINTEGER64) u64;
+		////delete f1Mem[u];
 
-		if (u % 100 == 0)
-		{
-			printf("%s\n", "working . . .");
-		}
+		//if (u % 100 == 0)
+		//{
+		//	printf("%s\n", "working . . .");
+		//}
+
+		sce::Platform::GetInstance().SetTextColour(sce::ConsoleTextColour::Red);		
+		sce::Platform::GetInstance().Print(sce::ConsoleStream::CONSOLE_STDERROR, "Hello world! (const) (ascii)\n");
+		sce::Platform::GetInstance().SetTextColour(sce::ConsoleTextColour::Blue);
+		sce::Platform::GetInstance().Print(sce::ConsoleStream::CONSOLE_STDOUT, L"Hello world! (const) (unicode)\n");
+
+		/*c8* sz8 = const_cast<c8*>("Hello world! (ascii)\n");
+		c16* sz16 = const_cast<c16*>(L"Hello world! (unicode)\n");
+
+		sce::Platform::GetInstance().Print(sce::ConsoleStream::CONSOLE_STDERROR, sz8);
+		sce::Platform::GetInstance().Print(sce::ConsoleStream::CONSOLE_STDOUT, sz16);*/
+
+		c8 szB8[256]	= "Hello world (ascii)\n";
+		c16 szB16[256]	= L"Hello world (unicode)\n";
+
+		//sce::Platform::GetInstance().Read(szB8, 256);
+		//sce::Platform::GetInstance().Read(szB16, 256);
+
+		sce::Platform::GetInstance().SetTextColour(sce::ConsoleTextColour::LightGreen);
+		sce::Platform::GetInstance().Print(sce::ConsoleStream::CONSOLE_STDERROR, szB8);
+		sce::Platform::GetInstance().SetTextColour(sce::ConsoleTextColour::LightMagenta);
+		sce::Platform::GetInstance().Print(sce::ConsoleStream::CONSOLE_STDOUT, szB16);
+
+		sce::Platform::GetInstance().ResetTextColour();
 	}
 }
 
@@ -60,10 +84,10 @@ v8 f1(const u32 c)
 */
 i32 sce::Application::Run()
 {
-#if defined(SCE_PLATFORM_DEBUG)
-	printf("%s\n", __FUNCTION__);
-#endif // !SCE_PLATFORM_DEBUG
-
+//#if defined(SCE_PLATFORM_DEBUG)
+//	printf("%s\n", __FUNCTION__);
+//#endif // !SCE_PLATFORM_DEBUG
+// 
 	std::thread t1(f1, max);
 	/*std::thread t2(f1, max);
 	std::thread t3(f1, max);
@@ -91,9 +115,9 @@ i32 sce::Application::Run()
 */
 v8 sce::Application::Setup()
 {
-#if defined(SCE_PLATFORM_DEBUG)
-	printf("%s\n", __FUNCTION__);
-#endif // !SCE_PLATFORM_DEBUG
+//#if defined(SCE_PLATFORM_DEBUG)
+//	printf("%s\n", __FUNCTION__);
+//#endif // !SCE_PLATFORM_DEBUG
 
 }
 
@@ -101,11 +125,11 @@ v8 sce::Application::Setup()
 */
 v8 sce::Application::Shutdown()
 {
-#if defined(SCE_PLATFORM_DEBUG)
-	printf("%s\n", __FUNCTION__);
-#endif // !SCE_PLATFORM_DEBUG
+//#if defined(SCE_PLATFORM_DEBUG)
+//	printf("%s\n", __FUNCTION__);
+//#endif // !SCE_PLATFORM_DEBUG
 
-	wprintf(L"%s\n", sce::Platform::GetInstance().StatsToString());
+	//wprintf(L"%s\n", sce::Platform::GetInstance().StatsToString());
 	sce::Platform::GetInstance().Shutdown();
-	wprintf(L"%s\n", sce::Platform::GetInstance().StatsToString());
+	//wprintf(L"%s\n", sce::Platform::GetInstance().StatsToString());
 }

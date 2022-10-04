@@ -22,7 +22,9 @@
 #include "defines.h"
 #include "using.h"
 #include "patterns.h"
+
 #include "memory.h"
+#include "console.h"
 
 /*
 * ===========================================================
@@ -45,6 +47,28 @@ v8* operator new(size_t nSize, sce::MemoryFlag sFlag);
 * ===========================================================
 */
 #if defined(SCE_PLATFORM_WINDOWS)
+
+/*
+* ===========================================================
+* Namespace: sce
+* ===========================================================
+*/
+namespace sce
+{
+	/* Turns the given windowsw error code into a ASCII
+	* string.
+	* @param nCode: Code to process in to a string.
+	* @retrun String containing the relevant information.
+	*/
+	SCEAPI const c8* ErrorToStringA(i32 nCode);
+
+	/* Turns the given windowsw error code into a UNICODE
+	* string.
+	* @param nCode: Code to process in to a string.
+	* @retrun String containing the relevant information.
+	*/
+	SCEAPI const c16* ErrorToStringW(i32 nCode);
+}
 
 /*
 * ===========================================================
@@ -154,6 +178,90 @@ namespace sce::sys
 		*/
 		static const c16* StatsToString();
 	};
+
+	/* ==========================================================
+	* PlatformConsole class
+	* Manages console input and output.
+	* Thread safe.
+	*/
+	class PlatformConsole
+	{
+	private:
+		static LPCWSTR m_szMutexName;
+		static HANDLE m_hMutex;
+
+		static HANDLE m_hStdError;
+		static HANDLE m_hStdOut;
+		static HANDLE m_hStdIn;		
+
+	private:
+		/* Sets up the Platform Console class
+		*/
+		static v8 SetupConsole();
+
+	protected:
+		/* Shuts down the Platform Console class
+		*/
+		static v8 ShutdownConsole();
+
+	public:
+		/* Overloaded function which prints text to console.
+		* Default stream is 'stderr'.
+		* @param szString: String to be printed (ascii)
+		* @param eStream: Select output stream		
+		* @return Number of characters printed
+		*/
+		static size64 Print(ConsoleStream eStream, c8* szString);
+
+		/* Overloaded function which prints text to console.
+		* Default stream is 'stderr'.
+		* @param szString: String to be printed (ascii)
+		* @param eStream: Select output stream
+		* @return Number of characters printed
+		*/
+		static size64 Print(ConsoleStream eStream, const c8* szString);
+
+		/* Overloaded function which prints text to console.
+		* Default stream is 'stderr'.
+		* @param szString: String to be printed (unicode)
+		* @param eStream: Select output stream
+		* @return Number of characters printed
+		*/
+		static size64 Print(ConsoleStream eStream, c16* szString);
+
+		/* Overloaded function which prints text to console.
+		* Default stream is 'stderr'.
+		* @param szString: String to be printed (unicode)
+		* @param eStream: Select output stream		
+		* @return Number of characters printed
+		*/
+		static size64 Print(ConsoleStream eStream, const c16* szString);
+
+		/* Reads input from the console 
+		* @param szBuffer: Buffer to read input into
+		* @param nSize: Size of the buffer to read into
+		* @return The number of characters read
+		*/
+		static size64 Read(c8* szBuffer, size64 nSize);
+
+		/* Reads input from the console
+		* @param szBuffer: Buffer to read input into
+		* @param nSize: Size of the buffer to read into
+		* @return The number of characters read
+		*/
+		static size64 Read(c16* szBuffer, size64 nSize);
+
+		/* Sets the console text (foreground) colour on console
+		* @param eStream: Select the stream to change colour on
+		* @param eColour: Select the text colour
+		*/
+		static v8 SetTextColour(ConsoleTextColour eColour, ConsoleStream eStream = ConsoleStream::CONSOLE_STDOUT);
+
+		/* Reset the console text (foreground) colour
+		* @param eStream: Select the stream to change colour on
+		*/
+		static v8 ResetTextColour(ConsoleStream eStream = ConsoleStream::CONSOLE_STDOUT);
+	};
 }
 
 /*
@@ -168,10 +276,13 @@ namespace sce
 	* Manage the operating system.
 	* Exported.
 	*/
-	class SCEAPI Platform : public ITSSingleton<Platform>, public sce::sys::PlatformAllocator
+	class SCEAPI Platform : public ITSSingleton<Platform>, public sce::sys::PlatformAllocator, public sce::sys::PlatformConsole
 	{
 	private:
+
 	public:
+		/* Shuts down the Platform class 
+		*/
 		static v8 Shutdown();
 	};
 }
