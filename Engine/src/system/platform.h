@@ -59,7 +59,7 @@ v8* operator new(size_t nSize, sce::MemoryFlag sFlag);
 * ===========================================================
 */
 namespace sce::sys
-{
+{ 
 	/* ==========================================================
 	* PlatformAllocator class
 	* Manages memory allocation globally for operating system.
@@ -135,7 +135,7 @@ namespace sce::sys
 		* address
 		* @param pAddr: Address to delete
 		*/
-		static v8 Deallocate(v8* pAddr);		
+		static v8 Deallocate(v8* pAddr);
 
 		/* Gets the size of the allocation on stack for input
 		* address
@@ -144,10 +144,10 @@ namespace sce::sys
 		*/
 		static size64 AddressStackSize(v8* pAddr);
 
-		//static size64 GetStat(u8 nStat);
-		//static MemoryNodeStats GetStats();		
-
-		//static c16* StatToString(u8 nStat);
+		/* Get the memory statistics
+		* @return Memory statistics
+		*/
+		static MemoryNodeStats GetStats();
 
 		/* Returns a string containing the stats for total 
 		* memory used

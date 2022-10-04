@@ -673,12 +673,12 @@ const c16* sce::sys::PlatformAllocator::NodeToString(MemoryNode* pNode)
 	wmemset(p_copy, 0, sizeof(c16));
 
 	//n_len = snprintf(p_buffer + n_len, n_bufLen, "Node Stats (%p):\n", p_proc->s_Flag);
-	n_len = snprintf(p_buffer + n_len, n_bufLen, "Node Stats (%s):\n", NodeStatusToStringA(p_proc->s_Flag));
+	n_len = snprintf(p_buffer + n_len, n_bufLen, "Node Stats (%s):\n", sce_NodeStatusToStringA(p_proc->s_Flag));
 
 	n_len += snprintf(p_buffer + n_len, n_bufLen, "\t%s:\t%p\n", "Node address", p_proc);
 	n_len += snprintf(p_buffer + n_len, n_bufLen, "\t%s:\t%.2f bytes\n", "Node size", static_cast<f32>(p_proc->n_NodeSize));
 
-	c8* sz_tagStr = const_cast<c8*>(MemoryTagToStringA(p_proc->s_Flag));
+	c8* sz_tagStr = const_cast<c8*>(sce_MemoryTagToStringA(p_proc->s_Flag));
 
 	n_len += snprintf(p_buffer + n_len, n_bufLen, "\t%s:\t%s\n", "Memory Tag", sz_tagStr);
 	
@@ -742,6 +742,14 @@ size64 sce::sys::PlatformAllocator::AddressStackSize(v8* pAddr)
 	return 0;
 }
 
+/* Get the memory statistics
+* @return Memory statistics
+*/
+sce::sys::MemoryNodeStats sce::sys::PlatformAllocator::GetStats()
+{
+	return m_sStats;
+}
+
 /* Returns a string containing the stats for total
 * memory used
 */
@@ -751,232 +759,100 @@ const c16* sce::sys::PlatformAllocator::StatsToString()
 //	printf("%s\n", __FUNCTION__);
 //#endif // !SCE_PLATFORM_DEBUG
 
-	DWORD dw_mutexResult		= 0;	
-	const u32 u_length			= 8000;	
-	size64 n_len				= 0;
-	size64 n_measure			= 0;
-	f32 n_ptrSize				= 0.0f;
-	f32 n_allocSize				= 0.0f;
-	f32 n_ptrTagSize			= 0.0f;
-	f32 n_allocTagSize			= 0.0f;
-	c8* sz_bufferA				= static_cast<c8*>(VirtualAlloc(NULL, sizeof(c8) * u_length, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE));
-	c8 sz_unit[4]				= "XiB";
-	c16* sz_bufferW				= static_cast<c16*>(VirtualAlloc(NULL, sizeof(c16) * u_length, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE));
-	c16* sz_out					= nullptr;
+	const u16 n_bufferSize			= 8012;
+	const u16 n_arraySize			= 1024;
+	u16 n_length					= 0;
+	u16 n_count						= 0;
+	MemorySizeResult* s_result		= nullptr;
+	c8* sz_aBuffer					= nullptr;
+	c16* sz_wBuffer					= nullptr;
+	c16* sz_out						= nullptr;
 
-	if (m_hMutex)
+	if (!(sz_aBuffer = static_cast<c8*>(VirtualAlloc(NULL, sizeof(c8) * n_bufferSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE))))
 	{
-		dw_mutexResult = WaitForSingleObject(m_hMutex, INFINITE);
+		printf("%s: VirtualAlloc (%d)\n", __FUNCTION__, GetLastError());
+		return nullptr;
 	}
 
-	n_len = snprintf(sz_bufferA + n_len, u_length, "%s:\n", "Total Memory Stat(s)");
-
-	// Total pointer size
-	if (m_sStats.TotalPointerMemoryUsed > Mem_MemorySize(MemorySizes::MEMORY_PEBIBYTE))
+	if (!(sz_wBuffer = static_cast<c16*>(VirtualAlloc(NULL, sizeof(c16) * n_bufferSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE))))
 	{
-		n_ptrSize = m_sStats.TotalPointerMemoryUsed / static_cast<f32>(Mem_MemorySize(MemorySizes::MEMORY_PEBIBYTE));
-		sz_unit[0] = 'P';
-	}
-	else if(m_sStats.TotalPointerMemoryUsed > Mem_MemorySize(MemorySizes::MEMORY_TEBIBYTE))
-	{
-		n_ptrSize = m_sStats.TotalPointerMemoryUsed / static_cast<f32>(Mem_MemorySize(MemorySizes::MEMORY_TEBIBYTE));
-		sz_unit[0] = 'T';
-	}
-	else if (m_sStats.TotalPointerMemoryUsed > Mem_MemorySize(MemorySizes::MEMORY_GIBIBYTE))
-	{
-		n_ptrSize = m_sStats.TotalPointerMemoryUsed / static_cast<f32>(Mem_MemorySize(MemorySizes::MEMORY_GIBIBYTE));
-		sz_unit[0] = 'G';
-	}
-	else if (m_sStats.TotalPointerMemoryUsed > Mem_MemorySize(MemorySizes::MEMORY_MEBIBYTE))
-	{
-		n_ptrSize = m_sStats.TotalPointerMemoryUsed / static_cast<f32>(Mem_MemorySize(MemorySizes::MEMORY_MEBIBYTE));
-		sz_unit[0] = 'M';
-	}
-	else if (m_sStats.TotalPointerMemoryUsed > Mem_MemorySize(MemorySizes::MEMORY_KIBIBYTE))
-	{
-		n_ptrSize = m_sStats.TotalPointerMemoryUsed / static_cast<f32>(Mem_MemorySize(MemorySizes::MEMORY_KIBIBYTE));
-		sz_unit[0] = 'K';
-	}
-	else
-	{
-		n_ptrSize = m_sStats.TotalPointerMemoryUsed;
-		sz_unit[0] = 'B';
-		sz_unit[1] = '\0';
+		printf("%s: VirtualAlloc (%d)\n", __FUNCTION__, GetLastError());
+		return nullptr;
 	}
 
-	n_len += snprintf(sz_bufferA + n_len, u_length, "\tTotal pointer size:\t%.2f %s\n", n_ptrSize, sz_unit);
-	sz_unit[0] = 'X';
-	sz_unit[1] = 'i';
-	sz_unit[2] = 'B';
-	sz_unit[3] = '\0';
-
-	// Total allocation size
-	if (m_sStats.TotalAllocationMemoryUsed > Mem_MemorySize(MemorySizes::MEMORY_PEBIBYTE))
+	if (!(s_result = static_cast<MemorySizeResult*>(VirtualAlloc(NULL, sizeof(MemorySizeResult) * n_arraySize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE))))
 	{
-		n_allocSize = m_sStats.TotalAllocationMemoryUsed / static_cast<f32>(Mem_MemorySize(MemorySizes::MEMORY_PEBIBYTE));
-		sz_unit[0] = 'P';
-	}
-	else if (m_sStats.TotalAllocationMemoryUsed > Mem_MemorySize(MemorySizes::MEMORY_TEBIBYTE))
-	{
-		n_allocSize = m_sStats.TotalAllocationMemoryUsed / static_cast<f32>(Mem_MemorySize(MemorySizes::MEMORY_TEBIBYTE));
-		sz_unit[0] = 'T';
-	}
-	else if (m_sStats.TotalAllocationMemoryUsed > Mem_MemorySize(MemorySizes::MEMORY_GIBIBYTE))
-	{
-		n_allocSize = m_sStats.TotalAllocationMemoryUsed / static_cast<f32>(Mem_MemorySize(MemorySizes::MEMORY_GIBIBYTE));
-		sz_unit[0] = 'G';
-	}
-	else if (m_sStats.TotalAllocationMemoryUsed > Mem_MemorySize(MemorySizes::MEMORY_MEBIBYTE))
-	{
-		n_allocSize = m_sStats.TotalAllocationMemoryUsed / static_cast<f32>(Mem_MemorySize(MemorySizes::MEMORY_MEBIBYTE));
-		sz_unit[0] = 'M';
-	}
-	else if (m_sStats.TotalAllocationMemoryUsed > Mem_MemorySize(MemorySizes::MEMORY_KIBIBYTE))
-	{
-		n_allocSize = m_sStats.TotalAllocationMemoryUsed / static_cast<f32>(Mem_MemorySize(MemorySizes::MEMORY_KIBIBYTE));
-		sz_unit[0] = 'K';
-	}
-	else
-	{
-		n_allocSize = m_sStats.TotalAllocationMemoryUsed;
-		sz_unit[0] = 'B';
-		sz_unit[1] = '\0';
+		printf("%s: VirtualAlloc (%d)\n", __FUNCTION__, GetLastError());
+		return nullptr;
 	}
 
-	
-	n_len += snprintf(sz_bufferA + n_len, u_length, "\tTotal stack size:\t%.2f %s\n", n_allocSize, sz_unit);
-	sz_unit[0] = 'X';
-	sz_unit[1] = 'i';
-	sz_unit[2] = 'B';
-	sz_unit[3] = '\0';
+	s_result[n_count] = sce_MemorySizeTest(m_sStats.TotalPointerMemoryUsed, MemoryDecBin::Binary);
+	n_length = snprintf(sz_aBuffer + n_length, n_bufferSize, "Total heap memory used: %.02lf %s\n", s_result[n_count].n_Size, s_result[n_count].ch_Unit);
 
-	n_len += snprintf(sz_bufferA + n_len, u_length, "    %s:\n", "Pointer size (by tag)");
-
-	for (int i = 1; i < MemoryFlag::MEMORY_MAXTAGS; i++)
+	for (int i = 0; i < MemoryFlag::MEMORY_MAXTAGS; i++)
 	{
-		// Total allocation size
-		if (m_sStats.FlagPointerMemoryUsed[i] > Mem_MemorySize(MemorySizes::MEMORY_PEBIBYTE))
+		const char* name = sce_MemoryTagToStringA(static_cast<MemoryFlag>(i));
+		s_result[++n_count] = sce_MemorySizeTest(m_sStats.FlagPointerMemoryUsed[i], MemoryDecBin::Binary);
+
+		if (15 < strlen(name))
 		{
-			n_ptrTagSize = m_sStats.FlagPointerMemoryUsed[i] / static_cast<f32>(Mem_MemorySize(MemorySizes::MEMORY_PEBIBYTE));
-			sz_unit[0] = 'P';
-		}
-		else if (m_sStats.FlagPointerMemoryUsed[i] > Mem_MemorySize(MemorySizes::MEMORY_TEBIBYTE))
-		{
-			n_ptrTagSize = m_sStats.FlagPointerMemoryUsed[i] / static_cast<f32>(Mem_MemorySize(MemorySizes::MEMORY_TEBIBYTE));
-			sz_unit[0] = 'T';
-		}
-		else if (m_sStats.FlagPointerMemoryUsed[i] > Mem_MemorySize(MemorySizes::MEMORY_GIBIBYTE))
-		{
-			n_ptrTagSize = m_sStats.FlagPointerMemoryUsed[i] / static_cast<f32>(Mem_MemorySize(MemorySizes::MEMORY_GIBIBYTE));
-			sz_unit[0] = 'G';
-		}
-		else if (m_sStats.FlagPointerMemoryUsed[i] > Mem_MemorySize(MemorySizes::MEMORY_MEBIBYTE))
-		{
-			n_ptrTagSize = m_sStats.FlagPointerMemoryUsed[i] / static_cast<f32>(Mem_MemorySize(MemorySizes::MEMORY_MEBIBYTE));
-			sz_unit[0] = 'M';
-		}
-		else if (m_sStats.FlagPointerMemoryUsed[i] > Mem_MemorySize(MemorySizes::MEMORY_KIBIBYTE))
-		{
-			n_ptrTagSize = m_sStats.FlagPointerMemoryUsed[i] / static_cast<f32>(Mem_MemorySize(MemorySizes::MEMORY_KIBIBYTE));
-			sz_unit[0] = 'K';
+			n_length += snprintf(sz_aBuffer + n_length, n_bufferSize, "\t%s:\t%.02lf %s\n", name, s_result[n_count].n_Size, s_result[n_count].ch_Unit);
 		}
 		else
 		{
-			n_ptrTagSize = m_sStats.FlagPointerMemoryUsed[i];
-			sz_unit[0] = 'B';
-			sz_unit[1] = '\0';
-		}
+			n_length += snprintf(sz_aBuffer + n_length, n_bufferSize, "\t%s:\t\t%.02lf %s\n", name, s_result[n_count].n_Size, s_result[n_count].ch_Unit);
+		}		
+	}
 
-		const c8* name = MemoryTagToStringA(static_cast<MemoryFlag>(i));
+	s_result[++n_count] = sce_MemorySizeTest(m_sStats.TotalAllocationMemoryUsed, MemoryDecBin::Binary);
+	n_length += snprintf(sz_aBuffer + n_length, n_bufferSize, "Total stack memory used: %.02lf %s\n", s_result[n_count].n_Size, s_result[n_count].ch_Unit);
 
-		if (strlen(name) < 16)
+	for (int i = 0; i < MemoryFlag::MEMORY_MAXTAGS; i++)
+	{
+		const char* name = sce_MemoryTagToStringA(static_cast<MemoryFlag>(i));
+		s_result[++n_count] = sce_MemorySizeTest(m_sStats.FlagAllocationMemoryUsed[i], MemoryDecBin::Binary);
+
+		if (15 < strlen(name))
 		{
-			n_len += snprintf(sz_bufferA + n_len, u_length, "\t%s:\t\t%.2f %s\n", name, n_ptrTagSize, sz_unit);
+			n_length += snprintf(sz_aBuffer + n_length, n_bufferSize, "\t%s:\t%.02lf %s\n", name, s_result[n_count].n_Size, s_result[n_count].ch_Unit);
 		}
 		else
 		{
-			n_len += snprintf(sz_bufferA + n_len, u_length, "\t%s:\t%.2f %s\n", name, n_ptrTagSize, sz_unit);
+			n_length += snprintf(sz_aBuffer + n_length, n_bufferSize, "\t%s:\t\t%.02lf %s\n", name, s_result[n_count].n_Size, s_result[n_count].ch_Unit);
 		}
-
-		sz_unit[0] = 'X';
-		sz_unit[1] = 'i';
-		sz_unit[2] = 'B';
-		sz_unit[3] = '\0';
 	}
 
-	n_len += snprintf(sz_bufferA + n_len, u_length, "    %s:\n", "Stack size (by tag)");
-
-	for (int i = 1; i < MemoryFlag::MEMORY_MAXTAGS; i++)
+	if (!(VirtualFree(s_result, NULL, MEM_RELEASE)))
 	{
-		// Total allocation size
-		if (m_sStats.FlagAllocationMemoryUsed[i] > Mem_MemorySize(MemorySizes::MEMORY_PEBIBYTE))
-		{
-			n_allocTagSize = m_sStats.FlagAllocationMemoryUsed[i] / static_cast<f32>(Mem_MemorySize(MemorySizes::MEMORY_PEBIBYTE));
-			sz_unit[0] = 'P';
-		}
-		else if (m_sStats.FlagAllocationMemoryUsed[i] > Mem_MemorySize(MemorySizes::MEMORY_TEBIBYTE))
-		{
-			n_allocTagSize = m_sStats.FlagAllocationMemoryUsed[i] / static_cast<f32>(Mem_MemorySize(MemorySizes::MEMORY_TEBIBYTE));
-			sz_unit[0] = 'T';
-		}
-		else if (m_sStats.FlagAllocationMemoryUsed[i] > Mem_MemorySize(MemorySizes::MEMORY_GIBIBYTE))
-		{
-			n_allocTagSize = m_sStats.FlagAllocationMemoryUsed[i] / static_cast<f32>(Mem_MemorySize(MemorySizes::MEMORY_GIBIBYTE));
-			sz_unit[0] = 'G';
-		}
-		else if (m_sStats.FlagAllocationMemoryUsed[i] > Mem_MemorySize(MemorySizes::MEMORY_MEBIBYTE))
-		{
-			n_allocTagSize = m_sStats.FlagAllocationMemoryUsed[i] / static_cast<f32>(Mem_MemorySize(MemorySizes::MEMORY_MEBIBYTE));
-			sz_unit[0] = 'M';
-		}
-		else if (m_sStats.FlagAllocationMemoryUsed[i] > Mem_MemorySize(MemorySizes::MEMORY_KIBIBYTE))
-		{
-			n_allocTagSize = m_sStats.FlagAllocationMemoryUsed[i] / static_cast<f32>(Mem_MemorySize(MemorySizes::MEMORY_KIBIBYTE));
-			sz_unit[0] = 'K';
-		}
-		else
-		{
-			n_allocTagSize = m_sStats.FlagAllocationMemoryUsed[i];
-			sz_unit[0] = 'B';
-			sz_unit[1] = '\0';
-		}
-
-		const c8* name = MemoryTagToStringA(static_cast<MemoryFlag>(i));
-
-		if (strlen(name) < 16)
-		{
-			n_len += snprintf(sz_bufferA + n_len, u_length, "\t%s:\t\t%.2f %s\n", name, n_allocTagSize, sz_unit);
-		}
-		else
-		{
-			n_len += snprintf(sz_bufferA + n_len, u_length, "\t%s:\t%.2f %s\n", name, n_allocTagSize, sz_unit);
-		}
-
-		sz_unit[0] = 'X';
-		sz_unit[1] = 'i';
-		sz_unit[2] = 'B';
-		sz_unit[3] = '\0';
+		printf("%s: VirtualFree (%d)\n", __FUNCTION__, GetLastError());
+		return nullptr;
 	}
 
-	if (m_hMutex)
+	s_result	= nullptr;
+
+	if ('\n' == sz_aBuffer[strlen(sz_aBuffer) - 1])
 	{
-		dw_mutexResult = ReleaseMutex(m_hMutex);
+		sz_aBuffer[strlen(sz_aBuffer) - 1] = '\0';
 	}
 
-	mbstowcs(sz_bufferW, sz_bufferA, strlen(sz_bufferA) + 1);
-	sz_out = _wcsdup(sz_bufferW);
+	mbstowcs(sz_wBuffer, sz_aBuffer, n_length + 1);
 
-	if (sz_bufferA)
+	if (!(VirtualFree(sz_aBuffer, NULL, MEM_RELEASE)))
 	{
-		VirtualFree(sz_bufferA, NULL, MEM_RELEASE);
-		sz_bufferA = nullptr;
+		printf("%s: VirtualFree (%d)\n", __FUNCTION__, GetLastError());
+		return nullptr;
 	}
 
-	if (sz_bufferW)
+	sz_out = _wcsdup(sz_wBuffer);
+
+	if (!(VirtualFree(sz_wBuffer, NULL, MEM_RELEASE)))
 	{
-		VirtualFree(sz_bufferW, NULL, MEM_RELEASE);
-		sz_bufferW = nullptr;
-	}
+		printf("%s: VirtualFree (%d)\n", __FUNCTION__, GetLastError());
+		return nullptr;
+	}	
+
+	sz_aBuffer	= nullptr;
+	s_result	= nullptr;
 
 	return sz_out;
 }

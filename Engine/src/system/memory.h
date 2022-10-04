@@ -94,36 +94,62 @@ namespace sce
 		MEMORY_PEBIBYTE,
 	} MemorySizes;
 
-	/* Conerts a memory tag id to a name string
-	* @param sFlag: Input tag id
-	* @return Name of the tag
+	/* ==========================================================
+	* MEMORYDECBIN enumeration
+	* Sets whether to get decimal or binary stats for memory 
+	* nodes.
 	*/
-	const c16* MemoryTagToStringW(MemoryFlag sFlag);
+	SCEAPI typedef enum MEMORYDECBIN
+	{
+		Binary = 0,
+		Decimal
+	} MemoryDecBin;
+
+	/* ==========================================================
+	* MEMORYSIZERESULT struct
+	* Return type for memory stats
+	*/
+	SCEAPI typedef struct MEMORYSIZERESULT
+	{
+		c8 ch_Unit[4];
+		f64 n_Size;
+	} MemorySizeResult;
 
 	/* Conerts a memory tag id to a name string
 	* @param sFlag: Input tag id
 	* @return Name of the tag
 	*/
-	const c8* MemoryTagToStringA(MemoryFlag sFlag);
+	const c16* sce_MemoryTagToStringW(MemoryFlag sFlag);
+
+	/* Conerts a memory tag id to a name string
+	* @param sFlag: Input tag id
+	* @return Name of the tag
+	*/
+	const c8* sce_MemoryTagToStringA(MemoryFlag sFlag);
 
 	/* Converts memory status to string
 	* @param sStatus: Flag id
 	* @return String indicating if free or used
 	*/
-	const c8* NodeStatusToStringA(MemoryFlag sFlag);
+	const c8* sce_NodeStatusToStringA(MemoryFlag sFlag);
 
 	/* Converts memory status to string
 	* @param sStatus: Flag id
 	* @return String indicating if free or used
 	*/
-	const c16* NodeStatusToStringW(MemoryFlag sFlag);
+	const c16* sce_NodeStatusToStringW(MemoryFlag sFlag);
 
 	/* Gest a standard copmuting memasurement.
 	* @param eSize: Id for requested size
 	* @return The memory size as 64 bit unsigned integer
 	*/
-	SCEAPI const size64 Mem_MemorySize(MemorySizes eSize);
+	SCEAPI const size64 sce_MemorySize(MemorySizes eSize);	
 
+	/*
+	* ===========================================================
+	* Namespace: sce::sys
+	* ===========================================================
+	*/
 	namespace sys
 	{
 		static const c8* g_szMemoryStringArray[MemoryFlag::MEMORY_MAXTAGS]
@@ -154,6 +180,12 @@ namespace sce
 			"occupied"			
 		};
 	}
+
+	/* Gest a standard copmuting memasurement.
+	* @param eSize: Id for requested size
+	* @return The memory size as 64 bit unsigned integer
+	*/
+	SCEAPI const MemorySizeResult sce_MemorySizeTest(size64 nSize, MemoryDecBin eDecBin);
 }
 
 /*

@@ -49,13 +49,11 @@ v8 f1(const u32 c)
 		f1Mem[u] = new(sce::MemoryFlag::MEMORY_UINTEGER64) u64;
 		//delete f1Mem[u];
 
-		if (u % 10000 == 0)
+		if (u % 100 == 0)
 		{
 			printf("%s\n", "working . . .");
 		}
 	}
-
-	wprintf(L"%s\n", sce::Platform::GetInstance().StatsToString());
 }
 
 /* Runs the main application loop
@@ -69,12 +67,22 @@ i32 sce::Application::Run()
 	std::thread t1(f1, max);
 	/*std::thread t2(f1, max);
 	std::thread t3(f1, max);
-	std::thread t4(f1, max);*/	
+	std::thread t4(f1, max);
+
+	std::thread t5(f1, max);
+	std::thread t6(f1, max);
+	std::thread t7(f1, max);
+	std::thread t8(f1, max);*/
 
 	t1.join();
 	/*t2.join();
 	t3.join();
-	t4.join();*/
+	t4.join();
+
+	t5.join();
+	t6.join();
+	t7.join();
+	t8.join();*/
 
 	return 0;
 }
@@ -83,14 +91,21 @@ i32 sce::Application::Run()
 */
 v8 sce::Application::Setup()
 {
-	//sce::Platform::GetInstance().Setup();
-	//wprintf(L"%s\n", sce::Platform::GetInstance().StatsToString());
+#if defined(SCE_PLATFORM_DEBUG)
+	printf("%s\n", __FUNCTION__);
+#endif // !SCE_PLATFORM_DEBUG
+
 }
 
 /* Shuts down the class
 */
 v8 sce::Application::Shutdown()
 {
+#if defined(SCE_PLATFORM_DEBUG)
+	printf("%s\n", __FUNCTION__);
+#endif // !SCE_PLATFORM_DEBUG
+
+	wprintf(L"%s\n", sce::Platform::GetInstance().StatsToString());
 	sce::Platform::GetInstance().Shutdown();
 	wprintf(L"%s\n", sce::Platform::GetInstance().StatsToString());
 }
